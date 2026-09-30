@@ -26,7 +26,9 @@
     'html[data-autovideo="watch"] {',
     '  --av-list: 38vw;',
     '  --av-pw: calc(100vw - var(--av-list));',
-    '  --av-ph: min(calc(var(--av-pw) * 0.5625), 72vh);',
+    /* El reproductor se achica lo justo para que debajo entren los botones y los comentarios
+       (alturas medidas en vivo: --av-meta-h y --av-extra-h), sin bajar de 42% de la pantalla. */
+    '  --av-ph: max(42vh, min(calc(var(--av-pw) * 0.5625), calc(100vh - var(--av-meta-h, 0px) - var(--av-extra-h, 0px))));',
     '  --av-bg: var(--yt-spec-base-background, #0f0f0f);',
     '}',
     'html[data-autovideo="watch"] ytm-mobile-topbar-renderer#header-bar { display: none !important; }',
@@ -49,10 +51,29 @@
 
     /* Título, canal y botones debajo del reproductor */
     'html[data-autovideo="watch"] ytm-slim-video-metadata-section-renderer {',
+    '  display: flex !important; visibility: visible !important;',
     '  position: fixed !important; top: var(--av-ph) !important; right: 0 !important; left: auto !important;',
     '  width: var(--av-pw) !important; max-height: calc(100vh - var(--av-ph)) !important;',
     '  overflow-y: auto !important; box-sizing: border-box !important; z-index: 3 !important;',
     '  background: var(--av-bg) !important; padding-top: 4px !important;',
+    '}',
+
+    /* Tarjeta de Comentarios debajo de los botones (al tocarla, los comentarios se abren a la izquierda) */
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model) {',
+    '  display: block !important; visibility: visible !important;',
+    '  position: fixed !important; top: calc(var(--av-ph) + var(--av-meta-h, 0px)) !important; right: 0 !important; left: auto !important;',
+    '  width: var(--av-pw) !important; max-height: calc(100vh - var(--av-ph) - var(--av-meta-h, 0px)) !important;',
+    '  overflow: hidden !important; box-sizing: border-box !important; z-index: 3 !important;',
+    '  background: var(--av-bg) !important; margin: 0 !important;',
+    '}',
+
+    /* YouTube a veces oculta o transforma la página del video (por ejemplo con un Mix abierto).
+       Se fuerza visible y sin transformaciones para que lo de arriba quede siempre en su lugar. */
+    'html[data-autovideo="watch"] .watch-below-the-player { display: block !important; }',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer { display: flex !important; }',
+    'html[data-autovideo="watch"] ytm-app, html[data-autovideo="watch"] .page-container, html[data-autovideo="watch"] ytm-watch,',
+    'html[data-autovideo="watch"] .watch-below-the-player, html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer {',
+    '  transform: none !important; filter: none !important; contain: none !important; will-change: auto !important; perspective: none !important;',
     '}',
 
     /* Columna izquierda: solo la lista de videos */
@@ -61,7 +82,7 @@
        título y los botones sigan debajo del reproductor (el panel del Mix la tapa a la izquierda). */
     'html[data-autovideo="watch"] ytm-watch { display: block !important; }',
     'html[data-autovideo="watch"] .watch-below-the-player { padding-top: 52px !important; }',
-    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer,',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer:not(:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model)),',
     'html[data-autovideo="watch"] ytm-reel-shelf-renderer { display: none !important; }',
 
     /* Filas compactas: miniatura a la izquierda, título a la derecha */
@@ -174,6 +195,33 @@
     }
   }
 
+  /* Mide la altura de los botones y de la tarjeta de comentarios que van debajo del reproductor,
+     para achicar el reproductor lo justo y que todo entre en la columna derecha. */
+  var META_SEL = 'ytm-slim-video-metadata-section-renderer';
+  var EXTRA_SEL = 'ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model)';
+  var resizeObserver = window.ResizeObserver ? new ResizeObserver(function () { measureRight(); }) : null;
+  var observed = [];
+
+  function setVar(root, name, value) {
+    if (root.style.getPropertyValue(name) !== value) root.style.setProperty(name, value);
+  }
+
+  function measureRight() {
+    var root = document.documentElement;
+    if (!root || root.getAttribute('data-autovideo') !== 'watch') return;
+    var meta = document.querySelector(META_SEL);
+    var extra = null;
+    try { extra = document.querySelector(EXTRA_SEL); } catch (e) { /* navegador sin :has() */ }
+    setVar(root, '--av-meta-h', (meta ? Math.ceil(meta.scrollHeight) : 0) + 'px');
+    setVar(root, '--av-extra-h', (extra ? Math.ceil(extra.scrollHeight) : 0) + 'px');
+    [meta, extra].forEach(function (el) {
+      if (el && resizeObserver && observed.indexOf(el) < 0) {
+        resizeObserver.observe(el);
+        observed.push(el);
+      }
+    });
+  }
+
   var pending = false;
   function schedule() {
     if (pending) return;
@@ -182,6 +230,7 @@
       pending = false;
       updateMode();
       hideOpenApp();
+      measureRight();
     }, 150);
   }
 
@@ -194,12 +243,14 @@
     };
   });
   window.addEventListener('popstate', schedule);
+  window.addEventListener('resize', function () { measureRight(); });
 
   function start() {
     updateMode();
     hideOpenApp();
+    measureRight();
     new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
-    setInterval(updateMode, 1000);
+    setInterval(function () { updateMode(); measureRight(); }, 1000);
   }
 
   if (document.documentElement) {
