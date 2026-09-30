@@ -57,6 +57,9 @@
 
     /* Columna izquierda: solo la lista de videos */
     'html[data-autovideo="watch"] ytm-watch { width: var(--av-list) !important; max-width: var(--av-list) !important; margin: 0 !important; }',
+    /* Con un Mix abierto YouTube oculta la página del video; se mantiene visible para que el
+       título y los botones sigan debajo del reproductor (el panel del Mix la tapa a la izquierda). */
+    'html[data-autovideo="watch"] ytm-watch { display: block !important; }',
     'html[data-autovideo="watch"] .watch-below-the-player { padding-top: 52px !important; }',
     'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer,',
     'html[data-autovideo="watch"] ytm-reel-shelf-renderer { display: none !important; }',
@@ -81,7 +84,53 @@
     '  font-size: 13px !important; line-height: 17px !important; max-height: 34px !important;',
     '  display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;',
     '}',
-    'html[data-autovideo="watch"] .related-items-container .media-item-metadata a > div { font-size: 11px !important; line-height: 14px !important; }'
+    'html[data-autovideo="watch"] .related-items-container .media-item-metadata a > div { font-size: 11px !important; line-height: 14px !important; }',
+
+    /* Paneles de YouTube (lista de un Mix, descripción, comentarios): en la columna izquierda.
+       Cuando se cierran, YouTube los quita de la página, así que no quedan tapando nada. */
+    'html[data-autovideo="watch"] ytm-engagement-panel {',
+    '  position: fixed !important; top: 0 !important; left: 0 !important; right: auto !important; bottom: 0 !important;',
+    '  width: var(--av-list) !important; max-width: var(--av-list) !important; height: 100vh !important;',
+    '  transform: none !important; z-index: 2 !important; overflow: hidden !important; background: var(--av-bg) !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-engagement-panel > *,',
+    'html[data-autovideo="watch"] ytm-engagement-panel .engagement-panel-section-list-background,',
+    'html[data-autovideo="watch"] ytm-engagement-panel .engagement-panel-container {',
+    '  height: 100% !important; max-height: 100% !important; transform: none !important; background: transparent !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-engagement-panel .engagement-panel-container {',
+    '  display: flex !important; flex-direction: column !important; padding-top: 48px !important; box-sizing: border-box !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-engagement-panel .engagement-panel-content-wrapper {',
+    '  flex: 1 1 auto !important; min-height: 0 !important; height: auto !important; overflow-y: auto !important;',
+    '}',
+
+    /* Barra "a continuación" del Mix (panel cerrado): abajo de la columna izquierda */
+    'html[data-autovideo="watch"] ytm-playlist-panel-entry-point {',
+    '  left: 8px !important; right: auto !important; bottom: 8px !important;',
+    '  width: calc(var(--av-list) - 16px) !important; max-width: calc(var(--av-list) - 16px) !important; box-sizing: border-box !important;',
+    '}',
+    'html[data-autovideo="watch"] .watch-below-the-player { padding-bottom: 72px !important; }',
+
+    /* Filas compactas también en la lista del Mix */
+    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemHost {',
+    '  gap: 8px !important; padding: 6px 8px !important; margin: 0 !important; box-sizing: border-box !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer a.YtmCompactMediaItemImage {',
+    '  flex: 0 0 46% !important; width: 46% !important; max-width: 46% !important; height: auto !important; margin: 0 !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer ytm-compact-thumbnail {',
+    '  width: 100% !important; height: auto !important; aspect-ratio: 16 / 9 !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemMetadata,',
+    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemMetadataContent { min-width: 0 !important; padding: 0 !important; }',
+    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemHeadline {',
+    '  font-size: 13px !important; line-height: 17px !important; max-height: 34px !important; margin: 0 !important; padding: 0 !important;',
+    '  display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemByline {',
+    '  font-size: 11px !important; line-height: 14px !important; padding: 0 !important;',
+    '}'
   ].join('\n');
 
   function addStyle() {
