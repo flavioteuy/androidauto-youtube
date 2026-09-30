@@ -17,11 +17,11 @@ object MotionSettings {
     private const val KEY_SECONDS = "sustained_seconds"
 
     const val MIN_SPEED_KMH = 5
-    const val MAX_SPEED_KMH = 30
+    const val MAX_SPEED_KMH = 300
     const val DEFAULT_SPEED_KMH = 15
 
     const val MIN_SECONDS = 2
-    const val MAX_SECONDS = 30
+    const val MAX_SECONDS = 7200
     const val DEFAULT_SECONDS = 10
 
     fun speedKmh(context: Context): Int =
