@@ -65,9 +65,24 @@ echo        Telefono encontrado.
 rem ---- 4. Instalar (instalacion normal: Android Auto acepta apps "para estacionado"
 rem         instaladas por fuera de Play Store si "Fuentes desconocidas" esta activado) ----
 echo  [4/5] Instalando AutoVideo...
+rem Primero se actualiza encima (conserva la sesion de YouTube y los ajustes).
+"%ADB%" install -r "%APK%" > "%DIR%\install.log" 2>&1
+findstr /c:"Success" "%DIR%\install.log" >nul
+if not errorlevel 1 goto :installed
+findstr /c:"INSTALL_FAILED_UPDATE_INCOMPATIBLE" "%DIR%\install.log" >nul
+if not errorlevel 1 goto :reinstall
+type "%DIR%\install.log"
+goto :err_install
+
+:reinstall
+rem La version instalada tiene otra firma (versiones viejas): hay que reinstalar desde cero.
+echo        La version anterior tiene otra firma: se reinstala desde cero...
 "%ADB%" uninstall uy.autovideo >nul 2>&1
-"%ADB%" install -r "%APK%"
+"%ADB%" install "%APK%"
 if errorlevel 1 goto :err_install
+
+:installed
+echo        Instalado.
 echo        Dando permiso de ubicacion (para tapar la imagen si el auto se mueve)...
 "%ADB%" shell pm grant uy.autovideo android.permission.ACCESS_FINE_LOCATION >nul 2>&1
 "%ADB%" shell pm grant uy.autovideo android.permission.ACCESS_COARSE_LOCATION >nul 2>&1

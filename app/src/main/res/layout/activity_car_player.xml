@@ -6,73 +6,79 @@
     android:background="#FF000000"
     android:fitsSystemWindows="true">
 
-    <LinearLayout
+    <!-- YouTube ocupa toda la pantalla -->
+    <WebView
+        android:id="@+id/car_web"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:orientation="vertical">
+        android:layout_height="match_parent" />
 
-        <!-- Barra superior: atrás, inicio y búsqueda -->
-        <LinearLayout
-            android:id="@+id/car_toolbar"
-            android:layout_width="match_parent"
-            android:layout_height="56dp"
-            android:background="#FF1F1F1F"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:paddingStart="4dp"
-            android:paddingEnd="4dp">
+    <!-- Botones flotantes semitransparentes (arriba a la izquierda) -->
+    <LinearLayout
+        android:id="@+id/car_pill"
+        android:layout_width="wrap_content"
+        android:layout_height="40dp"
+        android:layout_gravity="top|start"
+        android:layout_marginStart="6dp"
+        android:layout_marginTop="4dp"
+        android:background="@drawable/pill_bg"
+        android:gravity="center_vertical"
+        android:orientation="horizontal"
+        android:paddingStart="2dp"
+        android:paddingEnd="2dp">
 
-            <ImageButton
-                android:id="@+id/car_back"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/car_back"
-                android:src="@drawable/ic_back" />
+        <ImageButton
+            android:id="@+id/car_back"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/car_back"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_back" />
 
-            <ImageButton
-                android:id="@+id/car_home"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/car_home"
-                android:src="@drawable/ic_home" />
+        <ImageButton
+            android:id="@+id/car_home"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/car_home"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_home" />
 
-            <AutoCompleteTextView
-                android:id="@+id/car_search"
-                android:layout_width="0dp"
-                android:layout_height="44dp"
-                android:layout_marginStart="8dp"
-                android:layout_marginEnd="4dp"
-                android:layout_weight="1"
-                android:background="@drawable/search_bg"
-                android:completionThreshold="1"
-                android:hint="@string/search_hint"
-                android:imeOptions="actionSearch"
-                android:importantForAutofill="no"
-                android:inputType="text"
-                android:maxLines="1"
-                android:paddingStart="16dp"
-                android:paddingEnd="16dp"
-                android:textColor="#FFFFFFFF"
-                android:textColorHint="#FF9AA0A6"
-                android:textSize="18sp" />
-
-            <ImageButton
-                android:id="@+id/car_search_go"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="?android:attr/selectableItemBackgroundBorderless"
-                android:contentDescription="@string/car_search"
-                android:src="@drawable/ic_search" />
-        </LinearLayout>
-
-        <WebView
-            android:id="@+id/car_web"
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
+        <ImageButton
+            android:id="@+id/car_search_go"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:contentDescription="@string/car_search"
+            android:padding="8dp"
+            android:scaleType="fitCenter"
+            android:src="@drawable/ic_search" />
     </LinearLayout>
+
+    <!-- Buscador: aparece al tocar la lupa y se oculta al buscar -->
+    <AutoCompleteTextView
+        android:id="@+id/car_search"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:layout_gravity="top"
+        android:layout_marginStart="136dp"
+        android:layout_marginTop="4dp"
+        android:layout_marginEnd="8dp"
+        android:background="@drawable/search_bg"
+        android:completionThreshold="1"
+        android:hint="@string/search_hint"
+        android:imeOptions="actionSearch"
+        android:importantForAutofill="no"
+        android:inputType="text"
+        android:maxLines="1"
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:textColor="#FFFFFFFF"
+        android:textColorHint="#B3FFFFFF"
+        android:textSize="17sp"
+        android:visibility="gone" />
 
     <!-- Aviso que tapa la imagen si el vehículo se mueve (el audio sigue) -->
     <TextView

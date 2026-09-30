@@ -11,8 +11,8 @@ android {
         applicationId = "uy.autovideo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 2
-        versionName = "2.0"
+        versionCode = 3
+        versionName = "2.1"
     }
 
     signingConfigs {
@@ -46,4 +46,6 @@ android {
 
 dependencies {
     implementation("androidx.core:core:1.13.1")
+    // Inyectar los ajustes de diseño al inicio de cada página de YouTube
+    implementation("androidx.webkit:webkit:1.12.1")
 }

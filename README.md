@@ -46,9 +46,11 @@ Requiere Android 15 o superior en el teléfono.
 
 ## 3. Uso
 
-- **En el auto:** toca la pantalla como en el celular. Arriba hay botones de atrás, inicio y un
-  buscador (al tocarlo muestra las búsquedas recientes). Para ver en grande, usa el botón de
-  pantalla completa del reproductor.
+- **En el auto:** toca la pantalla como en el celular. Arriba a la izquierda flotan tres botones
+  semitransparentes: atrás, inicio y buscar (al tocar la lupa aparece el buscador con las búsquedas
+  recientes). Mientras ves un video, la lista de videos queda a la izquierda y el reproductor a la
+  derecha, con el título y los botones debajo. Para verlo en grande, usa el botón de pantalla
+  completa del reproductor.
 - **Desde el teléfono:** abre AutoVideo, escribe una búsqueda o pega un enlace y toca
   **Enviar al auto**. O en la app de YouTube: **Compartir → AutoVideo**.
 
