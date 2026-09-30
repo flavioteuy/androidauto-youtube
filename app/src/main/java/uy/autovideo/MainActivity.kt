@@ -93,7 +93,6 @@ class MainActivity : Activity() {
             arrayOf(
                 Manifest.permission.ACCESS_FINE_LOCATION,
                 Manifest.permission.ACCESS_COARSE_LOCATION,
-                CAR_SPEED_PERMISSION,
             ),
             REQUEST_PERMISSIONS
         )
@@ -120,6 +119,5 @@ class MainActivity : Activity() {
 
     private companion object {
         const val REQUEST_PERMISSIONS = 1
-        const val CAR_SPEED_PERMISSION = "com.google.android.gms.permission.CAR_SPEED"
     }
 }

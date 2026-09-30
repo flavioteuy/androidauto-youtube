@@ -62,13 +62,15 @@ goto :waitloop
 :found
 echo        Telefono encontrado.
 
-rem ---- 4. Instalar como si viniera de Play Store ----
+rem ---- 4. Instalar (instalacion normal: Android Auto acepta apps "para estacionado"
+rem         instaladas por fuera de Play Store si "Fuentes desconocidas" esta activado) ----
 echo  [4/5] Instalando AutoVideo...
 "%ADB%" uninstall uy.autovideo >nul 2>&1
-"%ADB%" install -r -i com.android.vending "%APK%"
+"%ADB%" install -r "%APK%"
 if errorlevel 1 goto :err_install
-"%ADB%" shell pm list packages -i uy.autovideo | findstr /c:"com.android.vending" >nul
-if errorlevel 1 goto :err_installer
+echo        Dando permiso de ubicacion (para tapar la imagen si el auto se mueve)...
+"%ADB%" shell pm grant uy.autovideo android.permission.ACCESS_FINE_LOCATION >nul 2>&1
+"%ADB%" shell pm grant uy.autovideo android.permission.ACCESS_COARSE_LOCATION >nul 2>&1
 
 rem ---- 5. Reiniciar Android Auto para que vea la app ----
 echo  [5/5] Reiniciando Android Auto...
@@ -79,11 +81,13 @@ echo  ==================================================
 echo    LISTO. AutoVideo quedo instalado.
 echo  ==================================================
 echo.
-echo   Ahora, en el telefono:
-echo    1. Abre AutoVideo y toca "Conceder permiso" (ubicacion).
+echo   Ahora:
+echo    1. En el telefono, revisa en los ajustes para desarrolladores
+echo       de Android Auto que "Fuentes desconocidas" siga activado.
 echo    2. Ajustes de Android Auto - Personalizar launcher:
 echo       AutoVideo deberia aparecer. Marcalo.
-echo    3. Conecta el auto y abrelo desde el menu de apps.
+echo    3. Con el auto estacionado, abrelo desde el menu de apps
+echo       de Android Auto.
 echo.
 echo   Ya puedes desconectar el cable. Si quieres, vuelve a
 echo   activar el Bloqueador automatico de Samsung.

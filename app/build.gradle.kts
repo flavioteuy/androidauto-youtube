@@ -10,15 +10,26 @@ android {
     defaultConfig {
         applicationId = "uy.autovideo"
         minSdk = 26
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
+        targetSdk = 35
+        versionCode = 2
+        versionName = "2.0"
+    }
+
+    signingConfigs {
+        // Clave fija guardada en el repositorio: todas las compilaciones quedan
+        // firmadas igual, así una versión nueva se instala encima de la anterior.
+        getByName("debug") {
+            storeFile = file("autovideo-debug.keystore")
+            storeType = "PKCS12"
+            storePassword = "android"
+            keyAlias = "androiddebugkey"
+            keyPassword = "android"
+        }
     }
 
     buildTypes {
         release {
             isMinifyEnabled = false
-            // Firmado con la clave de depuración para que se pueda instalar directamente.
             signingConfig = signingConfigs.getByName("debug")
         }
     }
@@ -34,9 +45,5 @@ android {
 }
 
 dependencies {
-    // Car App Library: pantalla en Android Auto
-    implementation("androidx.car.app:app:1.4.0")
-    implementation("androidx.car.app:app-projected:1.4.0")
     implementation("androidx.core:core:1.13.1")
-    implementation("androidx.lifecycle:lifecycle-common:2.6.2")
 }

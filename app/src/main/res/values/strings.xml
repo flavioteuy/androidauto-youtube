@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">AutoVideo</string>
-    <string name="tagline">Videos de YouTube en la pantalla de Android Auto</string>
+    <string name="tagline">Videos de YouTube en la pantalla de Android Auto, con el auto estacionado</string>
     <string name="share_label">Ver en el auto</string>
 
     <!-- Enviar al auto -->
@@ -15,20 +15,19 @@
     <string name="status_pending">Guardado: se abrirá cuando abras AutoVideo en Android Auto.</string>
 
     <!-- Permisos -->
-    <string name="perm_title">Permiso de ubicación</string>
-    <string name="perm_missing">Hace falta para saber si el vehículo está detenido. Sin él, el video solo se ve si el auto informa su velocidad.</string>
-    <string name="perm_ok">Concedido. El video se muestra con el vehículo detenido y se oculta al avanzar (el audio sigue).</string>
+    <string name="perm_title">Permiso de ubicación (opcional)</string>
+    <string name="perm_missing">Android Auto ya bloquea AutoVideo cuando manejas. Con este permiso, además, la app tapa la imagen si el GPS detecta que el auto se mueve.</string>
+    <string name="perm_ok">Concedido. Si el GPS detecta que el auto se mueve, la imagen se tapa (el audio sigue).</string>
     <string name="perm_button">Conceder permiso</string>
 
     <!-- Activación -->
     <string name="setup_title">Activarlo en Android Auto (una sola vez)</string>
-    <string name="setup_steps">1. Abre los ajustes de Android Auto en el teléfono (Ajustes → Dispositivos conectados → Preferencias de conexión → Android Auto).\n2. Baja hasta \"Versión\" y tócala unas 10 veces hasta que te pregunte si quieres activar los ajustes para desarrolladores. Acepta.\n3. Menú ⋮ (arriba a la derecha) → Configuración para desarrolladores → activa \"Fuentes desconocidas\".\n4. En los ajustes de Android Auto → Personalizar launcher, asegúrate de que AutoVideo esté marcado.\n5. Conecta el teléfono al auto y abre AutoVideo desde el menú de apps.</string>
+    <string name="setup_steps">1. Abre los ajustes de Android Auto en el teléfono (Ajustes → Dispositivos conectados → Preferencias de conexión → Android Auto).\n2. Baja hasta \"Versión\" y tócala unas 10 veces hasta que te pregunte si quieres activar los ajustes para desarrolladores. Acepta.\n3. Menú ⋮ (arriba a la derecha) → Configuración para desarrolladores → activa \"Fuentes desconocidas\".\n4. En los ajustes de Android Auto → Personalizar launcher, asegúrate de que AutoVideo esté marcado.\n5. Con el auto estacionado, abre AutoVideo desde el menú de apps de Android Auto.</string>
 
     <!-- Pantalla del auto -->
     <string name="search_hint">Buscar en YouTube</string>
-    <string name="search_no_history">Escribe lo que quieres ver</string>
+    <string name="car_back">Atrás</string>
+    <string name="car_home">Inicio</string>
+    <string name="car_search">Buscar</string>
     <string name="lock_moving">Vehículo en movimiento\n\nLa imagen se oculta mientras conduces.\nEl audio sigue sonando.</string>
-    <string name="lock_checking">Comprobando que el vehículo esté detenido…</string>
-    <string name="lock_no_signal">No se puede confirmar que el vehículo esté detenido\n\n(sin velocidad del auto ni señal GPS)</string>
-    <string name="lock_no_permission">Abre AutoVideo en el teléfono y concede el permiso de ubicación\n\npara poder ver video con el vehículo detenido.</string>
 </resources>

@@ -4,18 +4,20 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
-    <!-- Para saber si el vehículo está detenido (GPS del teléfono como respaldo). -->
+    <!-- Opcional: el GPS permite tapar la imagen si el vehículo se mueve
+         (protección extra; Android Auto ya bloquea las apps "para estacionado" al manejar). -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-    <!-- Velocidad que informa el propio auto a través de Android Auto. -->
-    <uses-permission android:name="com.google.android.gms.permission.CAR_SPEED" />
 
-    <!-- Plantilla de "navegación": es la única que da una superficie libre para dibujar. -->
-    <uses-permission android:name="androidx.car.app.NAVIGATION_TEMPLATES" />
-    <uses-permission android:name="androidx.car.app.ACCESS_SURFACE" />
-
+    <!--
+      App "para usar estacionado" (parked app) de Android Auto.
+      Android Auto solo acepta esta categoría para juegos, por eso appCategory="game".
+      A diferencia de las apps de plantillas, a estas SÍ se les aplica la opción
+      "Fuentes desconocidas" de los ajustes para desarrolladores de Android Auto.
+    -->
     <application
         android:allowBackup="false"
+        android:appCategory="game"
         android:hardwareAccelerated="true"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
@@ -23,14 +25,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AutoVideo">
 
-        <meta-data
-            android:name="com.google.android.gms.car.application"
-            android:resource="@xml/automotive_app_desc" />
-
-        <meta-data
-            android:name="androidx.car.app.minCarApiLevel"
-            android:value="1" />
-
+        <!-- App del teléfono: enviar videos al auto, permisos e instrucciones -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -48,14 +43,22 @@
             </intent-filter>
         </activity>
 
-        <service
-            android:name=".car.VideoCarAppService"
-            android:exported="true">
+        <!-- Pantalla del auto: la abre Android Auto desde su menú de apps -->
+        <activity
+            android:name=".car.CarPlayerActivity"
+            android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|density|keyboard|keyboardHidden|navigation|uiMode|fontScale"
+            android:exported="true"
+            android:label="@string/app_name"
+            android:launchMode="singleTask"
+            android:resizeableActivity="true"
+            android:taskAffinity="uy.autovideo.car"
+            android:theme="@style/Theme.AutoVideo.Car"
+            android:windowSoftInputMode="adjustResize">
             <intent-filter>
-                <action android:name="androidx.car.app.CarAppService" />
-                <category android:name="androidx.car.app.category.NAVIGATION" />
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.CAR_LAUNCHER" />
             </intent-filter>
-        </service>
+        </activity>
 
     </application>
 </manifest>

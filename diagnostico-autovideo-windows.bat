@@ -79,12 +79,15 @@ echo  Guardando el diagnostico...
 "%ADB%" shell pm list packages -i uy.autovideo >>"%OUT%" 2>&1
 "%ADB%" shell dumpsys package uy.autovideo | findstr /i /l "installer initiating originating packageSource versionName targetSdk" >>"%OUT%" 2>&1
 >>"%OUT%" echo.
->>"%OUT%" echo --- Servicio para Android Auto visible en el sistema ---
-"%ADB%" shell cmd package query-services --components -a androidx.car.app.CarAppService >>"%OUT%" 2>&1
+>>"%OUT%" echo --- Pantallas para Android Auto (CAR_LAUNCHER) ---
+"%ADB%" shell cmd package query-activities --components -a android.intent.action.MAIN -c android.intent.category.CAR_LAUNCHER >>"%OUT%" 2>&1
+>>"%OUT%" echo.
+>>"%OUT%" echo --- Categoria de AutoVideo ---
+"%ADB%" shell dumpsys package uy.autovideo | findstr /i /l "category flags=" >>"%OUT%" 2>&1
 >>"%OUT%" echo.
 >>"%OUT%" echo --- Mensajes de Android Auto ---
 "%ADB%" logcat -d -v time > "%RAW%" 2>&1
-findstr /i /l "autovideo car.app CarApp gearhead GH. projection allowlist whitelist unknown" "%RAW%" >>"%OUT%"
+findstr /i /l "autovideo CAR. VALIDATOR parked car.app CarApp gearhead GH. projection allowlist unknown" "%RAW%" >>"%OUT%"
 
 echo.
 echo  ==================================================
