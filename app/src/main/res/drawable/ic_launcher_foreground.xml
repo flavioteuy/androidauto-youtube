@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Icono original: una pantalla con un botón de reproducir sobre un soporte. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Marco de la pantalla -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:fillType="evenOdd"
+        android:pathData="M35,34H73A5,5 0 0,1 78,39V65A5,5 0 0,1 73,70H35A5,5 0 0,1 30,65V39A5,5 0 0,1 35,34Z M35,39V65H73V39Z" />
+    <!-- Botón reproducir -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M49,44L49,60L62,52Z" />
+    <!-- Soporte -->
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M51,70H57V74H64V77H44V74H51Z" />
+</vector>
