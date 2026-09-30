@@ -21,7 +21,7 @@
     <string name="perm_button">Conceder permiso</string>
     <string name="motion_desc">Para que el GPS no tape la imagen por error con el auto estacionado, solo cuenta el movimiento sostenido:</string>
     <string name="motion_speed_label">Velocidad: más de %1$d km/h</string>
-    <string name="motion_seconds_label">Durante: %1$d segundos seguidos (máx. 30)</string>
+    <string name="motion_seconds_label">Durante: %1$d segundos seguidos (máx. 7200)</string>
 
     <!-- Activación -->
     <string name="setup_title">Activarlo en Android Auto (una sola vez)</string>
