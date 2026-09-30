@@ -13,13 +13,17 @@ import android.os.Looper
 import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
+import uy.autovideo.shared.MotionSettings
 
 /**
- * Protección extra con el GPS del teléfono: avisa cuando el vehículo se mueve.
+ * Protección extra con el GPS del teléfono: tapa la imagen cuando el vehículo se mueve.
  *
  * La protección principal la hace Android Auto, que solo permite las apps
- * "para usar estacionado" con el auto detenido. Esto es una segunda capa:
- * si no hay permiso o no hay señal GPS, no bloquea nada.
+ * "para usar estacionado" con el auto detenido. Esto es una segunda capa.
+ *
+ * Para no activarse por error con el auto estacionado (el GPS a veces "salta" bajo
+ * techo o entre edificios), solo cuenta el movimiento sostenido: más de la velocidad
+ * configurada durante los segundos configurados, con lecturas continuas y precisas.
  */
 class MotionGuard(
     private val context: Context,
@@ -32,10 +36,18 @@ class MotionGuard(
     private val main = Handler(Looper.getMainLooper())
     private var locationManager: LocationManager? = null
     private var listening = false
+
+    /** Desde cuándo va rápido sin cortes (0 = no va rápido). */
+    private var fastSince = 0L
+    /** Desde cuándo va lento o detenido (0 = no). */
     private var slowSince = 0L
+    private var lastFixAt = 0L
 
     /** Si el GPS deja de informar mucho tiempo (garaje, túnel), se libera el bloqueo. */
-    private val staleTimeout = Runnable { setMoving(false) }
+    private val staleTimeout = Runnable {
+        fastSince = 0L
+        setMoving(false)
+    }
 
     private val listener = object : LocationListener {
         override fun onLocationChanged(location: Location) {
@@ -82,28 +94,46 @@ class MotionGuard(
         }
         locationManager = null
         listening = false
+        fastSince = 0L
         slowSince = 0L
+        lastFixAt = 0L
     }
 
     private fun handle(location: Location) {
         if (!location.hasSpeed()) return
+        // Lecturas poco confiables: se descartan (son las que causan activaciones falsas).
         if (location.hasAccuracy() && location.accuracy > MAX_ACCURACY_M) return
+        if (location.hasSpeedAccuracy() && location.speedAccuracyMetersPerSecond > MAX_SPEED_ERROR_MPS) return
+
+        val now = SystemClock.elapsedRealtime()
+        // Si hubo un corte largo entre lecturas, el movimiento "sostenido" vuelve a empezar.
+        if (lastFixAt != 0L && now - lastFixAt > MAX_GAP_MS) fastSince = 0L
+        lastFixAt = now
 
         main.removeCallbacks(staleTimeout)
         main.postDelayed(staleTimeout, STALE_MS)
 
-        val speed = location.speed
-        val now = SystemClock.elapsedRealtime()
+        val speedKmh = location.speed * 3.6f
+        val thresholdKmh = MotionSettings.speedKmh(context).toFloat()
+        val sustainMs = MotionSettings.sustainedSeconds(context) * 1000L
+        val stoppedBelowKmh = maxOf(3f, thresholdKmh / 3f)
+
         when {
-            speed > MOVING_MPS -> {
+            speedKmh >= thresholdKmh -> {
                 slowSince = 0L
-                setMoving(true)
+                if (fastSince == 0L) fastSince = now
+                if (now - fastSince >= sustainMs) setMoving(true)
             }
-            speed < STOPPED_MPS -> {
+            speedKmh < stoppedBelowKmh -> {
+                fastSince = 0L
                 if (slowSince == 0L) slowSince = now
                 if (now - slowSince >= STOP_CONFIRM_MS) setMoving(false)
             }
-            else -> slowSince = 0L
+            else -> {
+                // Velocidad intermedia: no cuenta como movimiento sostenido ni como detenido.
+                fastSince = 0L
+                slowSince = 0L
+            }
         }
     }
 
@@ -116,10 +146,10 @@ class MotionGuard(
 
     private companion object {
         const val TAG = "AutoVideo"
-        const val MOVING_MPS = 2.5f        // ~9 km/h
-        const val STOPPED_MPS = 1.0f       // ~3,6 km/h
         const val STOP_CONFIRM_MS = 3_000L
+        const val MAX_GAP_MS = 5_000L
         const val STALE_MS = 90_000L
-        const val MAX_ACCURACY_M = 50f
+        const val MAX_ACCURACY_M = 30f
+        const val MAX_SPEED_ERROR_MPS = 2f
     }
 }

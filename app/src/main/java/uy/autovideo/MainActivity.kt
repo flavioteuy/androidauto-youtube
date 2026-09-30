@@ -10,8 +10,10 @@ import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
+import android.widget.SeekBar
 import android.widget.TextView
 import uy.autovideo.shared.CarBridge
+import uy.autovideo.shared.MotionSettings
 import uy.autovideo.shared.YouTubeLinks
 
 /** App del teléfono: enviar videos al auto, permisos e instrucciones. */
@@ -41,6 +43,7 @@ class MainActivity : Activity() {
             }
         }
         permButton.setOnClickListener { requestPermissionsNow() }
+        setUpMotionSettings()
 
         handleShareIntent(intent)
     }
@@ -115,6 +118,50 @@ class MainActivity : Activity() {
             permStatus.text = getString(R.string.perm_missing)
             permButton.visibility = View.VISIBLE
         }
+    }
+
+    /** Velocidad mínima y segundos de movimiento sostenido antes de tapar la imagen. */
+    private fun setUpMotionSettings() {
+        val speedBar = findViewById<SeekBar>(R.id.motion_speed)
+        val speedLabel = findViewById<TextView>(R.id.motion_speed_label)
+        val secondsBar = findViewById<SeekBar>(R.id.motion_seconds)
+        val secondsLabel = findViewById<TextView>(R.id.motion_seconds_label)
+
+        // Las barras empiezan en 0: se desplazan por el mínimo de cada ajuste.
+        speedBar.max = MotionSettings.MAX_SPEED_KMH - MotionSettings.MIN_SPEED_KMH
+        speedBar.progress = MotionSettings.speedKmh(this) - MotionSettings.MIN_SPEED_KMH
+        secondsBar.max = MotionSettings.MAX_SECONDS - MotionSettings.MIN_SECONDS
+        secondsBar.progress = MotionSettings.sustainedSeconds(this) - MotionSettings.MIN_SECONDS
+
+        fun refreshLabels() {
+            speedLabel.text = getString(R.string.motion_speed_label, MotionSettings.speedKmh(this))
+            secondsLabel.text = getString(R.string.motion_seconds_label, MotionSettings.sustainedSeconds(this))
+        }
+        refreshLabels()
+
+        speedBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                MotionSettings.setSpeedKmh(this@MainActivity, progress + MotionSettings.MIN_SPEED_KMH)
+                refreshLabels()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
+
+        secondsBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+            override fun onProgressChanged(seekBar: SeekBar?, progress: Int, fromUser: Boolean) {
+                if (!fromUser) return
+                MotionSettings.setSustainedSeconds(this@MainActivity, progress + MotionSettings.MIN_SECONDS)
+                refreshLabels()
+            }
+
+            override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+            override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+        })
     }
 
     private companion object {

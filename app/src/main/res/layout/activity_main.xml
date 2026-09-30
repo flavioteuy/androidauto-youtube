@@ -78,6 +78,34 @@
                 android:id="@+id/perm_button"
                 style="@style/AccentButton"
                 android:text="@string/perm_button" />
+
+            <!-- Ajustes: velocidad mínima y segundos de movimiento sostenido -->
+            <TextView
+                style="@style/BodyText"
+                android:layout_marginTop="12dp"
+                android:text="@string/motion_desc" />
+
+            <TextView
+                android:id="@+id/motion_speed_label"
+                style="@style/BodyText"
+                android:textColor="@color/text"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/motion_speed"
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
+
+            <TextView
+                android:id="@+id/motion_seconds_label"
+                style="@style/BodyText"
+                android:textColor="@color/text"
+                android:textStyle="bold" />
+
+            <SeekBar
+                android:id="@+id/motion_seconds"
+                android:layout_width="match_parent"
+                android:layout_height="40dp" />
         </LinearLayout>
 
         <!-- Instrucciones -->

@@ -14,11 +14,14 @@
     <string name="status_sent">Listo: míralo en la pantalla del auto.</string>
     <string name="status_pending">Guardado: se abrirá cuando abras AutoVideo en Android Auto.</string>
 
-    <!-- Permisos -->
-    <string name="perm_title">Permiso de ubicación (opcional)</string>
-    <string name="perm_missing">Android Auto ya bloquea AutoVideo cuando manejas. Con este permiso, además, la app tapa la imagen si el GPS detecta que el auto se mueve.</string>
-    <string name="perm_ok">Concedido. Si el GPS detecta que el auto se mueve, la imagen se tapa (el audio sigue).</string>
+    <!-- Permisos y protección en movimiento -->
+    <string name="perm_title">Protección en movimiento (GPS)</string>
+    <string name="perm_missing">Android Auto ya bloquea AutoVideo cuando manejas. Con el permiso de ubicación, además, la app tapa la imagen si el GPS detecta que el auto se mueve (el audio sigue).</string>
+    <string name="perm_ok">Permiso concedido. Si el GPS detecta movimiento sostenido, la imagen se tapa (el audio sigue).</string>
     <string name="perm_button">Conceder permiso</string>
+    <string name="motion_desc">Para que el GPS no tape la imagen por error con el auto estacionado, solo cuenta el movimiento sostenido:</string>
+    <string name="motion_speed_label">Velocidad: más de %1$d km/h</string>
+    <string name="motion_seconds_label">Durante: %1$d segundos seguidos (máx. 30)</string>
 
     <!-- Activación -->
     <string name="setup_title">Activarlo en Android Auto (una sola vez)</string>

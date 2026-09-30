@@ -17,7 +17,10 @@ declara como juego (`android:appCategory="game"`). No se puede publicar así en 
 uso personal.
 
 **Seguridad:** Android Auto solo permite estas apps con el auto detenido. Además, si el GPS del
-teléfono detecta que el auto se mueve, la app tapa la imagen (el audio sigue).
+teléfono detecta movimiento sostenido, la app tapa la imagen (el audio sigue). En la app del
+teléfono se ajusta la velocidad mínima (5–30 km/h, por defecto 15) y cuántos segundos seguidos
+tiene que durar el movimiento (2–30 s, por defecto 10), para que el GPS no la tape por error con
+el auto estacionado.
 
 ---
 
