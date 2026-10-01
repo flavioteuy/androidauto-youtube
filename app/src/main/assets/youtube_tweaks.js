@@ -73,7 +73,7 @@
     '}',
 
     /* Tarjeta de Comentarios debajo de los botones (al tocarla, los comentarios se abren a la izquierda) */
-    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model) {',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer ytm-item-section-renderer:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model) {',
     '  display: block !important; visibility: visible !important;',
     '  position: fixed !important; top: calc(var(--av-ph) + var(--av-meta-h, 0px)) !important; right: 0 !important; left: auto !important;',
     '  width: var(--av-pw) !important; max-height: calc(100vh - var(--av-ph) - var(--av-meta-h, 0px)) !important;',
@@ -90,36 +90,55 @@
     '  transform: none !important; filter: none !important; contain: none !important; will-change: auto !important; perspective: none !important;',
     '}',
 
-    /* Columna izquierda: solo la lista de videos */
+    /* Columna izquierda: la lista de videos sugeridos */
     'html[data-autovideo="watch"] ytm-watch { width: var(--av-list) !important; max-width: var(--av-list) !important; margin: 0 !important; }',
     /* Con un Mix abierto YouTube oculta la página del video; se mantiene visible para que el
        título y los botones sigan debajo del reproductor (el panel del Mix la tapa a la izquierda). */
     'html[data-autovideo="watch"] ytm-watch { display: block !important; }',
     'html[data-autovideo="watch"] .watch-below-the-player { padding-top: 52px !important; }',
-    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer:not(:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model)),',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer ytm-item-section-renderer:not(:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model, ytm-video-with-context-renderer, ytm-compact-video-renderer, ytm-compact-radio-renderer, ytm-compact-playlist-renderer, yt-lockup-view-model)),',
     'html[data-autovideo="watch"] ytm-reel-shelf-renderer { display: none !important; }',
 
+    /* Encabezado de YouTube: su fondo quedaba como una franja sobre el video. */
+    'html[data-autovideo="watch"] .mobile-topbar-header-background { display: none !important; }',
+    /* Chips ("Todos", "Relacionados"...) de la lista de sugeridos: van fijos y taparían el video. */
+    'html[data-autovideo="watch"] ytm-related-chip-cloud-renderer,',
+    'html[data-autovideo="watch"] #related-chips-sentinel { display: none !important; }',
+    /* Bloque que envuelve el título, los botones y los comentarios en algunas versiones de la página.
+       YouTube lo desplaza con una animación (y lo oculta con algunas listas): debe quedar visible y quieto
+       para no "encerrar" a los elementos fijos. */
+    'html[data-autovideo="watch"] .related-chips-slot-wrapper {',
+    '  display: block !important; contain: none !important; container-type: normal !important;',
+    '  transform: none !important; transition: none !important; overflow: visible !important;',
+    '}',
+    /* Franja de fondo de la barra del Mix: solo en la columna izquierda y sin bloquear toques. */
+    'html[data-autovideo="watch"] .playlist-entrypoint-background-protection {',
+    '  left: 0 !important; right: auto !important; width: var(--av-list) !important;',
+    '  background: none !important; pointer-events: none !important;',
+    '}',
+    'html[data-autovideo="watch"] ytm-playlist-panel-entry-point { pointer-events: auto !important; }',
+
     /* Filas compactas: miniatura a la izquierda, título a la derecha */
-    'html[data-autovideo="watch"] .related-items-container ytm-media-item {',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer ytm-media-item {',
     '  display: flex !important; flex-direction: row !important; align-items: flex-start !important;',
     '  gap: 8px !important; padding: 6px 8px !important; margin: 0 !important; box-sizing: border-box !important;',
     '}',
-    'html[data-autovideo="watch"] .related-items-container a.media-item-thumbnail-container {',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer a.media-item-thumbnail-container {',
     '  flex: 0 0 46% !important; width: 46% !important; max-width: 46% !important; margin: 0 !important; padding: 0 !important;',
     '}',
-    'html[data-autovideo="watch"] .related-items-container ytm-thumbnail-cover {',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer ytm-thumbnail-cover {',
     '  width: 100% !important; height: auto !important; aspect-ratio: 16 / 9 !important;',
     '}',
-    'html[data-autovideo="watch"] .related-items-container .media-item-details {',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer .media-item-details {',
     '  flex: 1 1 auto !important; min-width: 0 !important; margin: 0 !important; padding: 0 !important;',
     '}',
-    'html[data-autovideo="watch"] .related-items-container .media-channel,',
-    'html[data-autovideo="watch"] .related-items-container ytm-bottom-sheet-renderer.media-item-menu { display: none !important; }',
-    'html[data-autovideo="watch"] .related-items-container .media-item-headline {',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer .media-channel,',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer ytm-bottom-sheet-renderer.media-item-menu { display: none !important; }',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer .media-item-headline {',
     '  font-size: 13px !important; line-height: 17px !important; max-height: 34px !important;',
     '  display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;',
     '}',
-    'html[data-autovideo="watch"] .related-items-container .media-item-metadata a > div { font-size: 11px !important; line-height: 14px !important; }',
+    'html[data-autovideo="watch"] ytm-single-column-watch-next-results-renderer .media-item-metadata a > div { font-size: 11px !important; line-height: 14px !important; }',
 
     /* Paneles de YouTube (lista de un Mix, descripción, comentarios): en la columna izquierda.
        Cuando se cierran, YouTube los quita de la página, así que no quedan tapando nada. */
@@ -147,23 +166,23 @@
     '}',
     'html[data-autovideo="watch"] .watch-below-the-player { padding-bottom: 72px !important; }',
 
-    /* Filas compactas también en la lista del Mix */
-    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemHost {',
+    /* Filas compactas también en la lista del Mix y en los Mix sugeridos */
+    'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) .YtmCompactMediaItemHost {',
     '  gap: 8px !important; padding: 6px 8px !important; margin: 0 !important; box-sizing: border-box !important;',
     '}',
-    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer a.YtmCompactMediaItemImage {',
+    'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) a.YtmCompactMediaItemImage {',
     '  flex: 0 0 46% !important; width: 46% !important; max-width: 46% !important; height: auto !important; margin: 0 !important;',
     '}',
-    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer ytm-compact-thumbnail {',
+    'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) ytm-compact-thumbnail {',
     '  width: 100% !important; height: auto !important; aspect-ratio: 16 / 9 !important;',
     '}',
-    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemMetadata,',
-    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemMetadataContent { min-width: 0 !important; padding: 0 !important; }',
-    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemHeadline {',
+    'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) .YtmCompactMediaItemMetadata,',
+    'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) .YtmCompactMediaItemMetadataContent { min-width: 0 !important; padding: 0 !important; }',
+    'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) .YtmCompactMediaItemHeadline {',
     '  font-size: 13px !important; line-height: 17px !important; max-height: 34px !important; margin: 0 !important; padding: 0 !important;',
     '  display: -webkit-box !important; -webkit-line-clamp: 2 !important; -webkit-box-orient: vertical !important; overflow: hidden !important;',
     '}',
-    'html[data-autovideo="watch"] ytm-playlist-panel-video-renderer .YtmCompactMediaItemByline {',
+    'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) .YtmCompactMediaItemByline {',
     '  font-size: 11px !important; line-height: 14px !important; padding: 0 !important;',
     '}'
   ].join('\n');
@@ -212,7 +231,8 @@
   /* Mide la altura de los botones y de la tarjeta de comentarios que van debajo del reproductor,
      para achicar el reproductor lo justo y que todo entre en la columna derecha. */
   var META_SEL = 'ytm-slim-video-metadata-section-renderer';
-  var EXTRA_SEL = 'ytm-single-column-watch-next-results-renderer > ytm-item-section-renderer:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model)';
+  var EXTRA_SEL = 'ytm-single-column-watch-next-results-renderer ytm-item-section-renderer:has(yt-video-metadata-carousel-view-model, comments-entry-point-teaser-view-model)';
+  var COMMENTS_MAX_PX = 64;
   var resizeObserver = window.ResizeObserver ? new ResizeObserver(function () { measureRight(); }) : null;
   var observed = [];
 
@@ -227,7 +247,7 @@
     var extra = null;
     try { extra = document.querySelector(EXTRA_SEL); } catch (e) { /* navegador sin :has() */ }
     setVar(root, '--av-meta-h', (meta ? Math.ceil(meta.scrollHeight) : 0) + 'px');
-    setVar(root, '--av-extra-h', (extra ? Math.ceil(extra.scrollHeight) : 0) + 'px');
+    setVar(root, '--av-extra-h', (extra ? Math.min(Math.ceil(extra.scrollHeight), COMMENTS_MAX_PX) : 0) + 'px');
     [meta, extra].forEach(function (el) {
       if (el && resizeObserver && observed.indexOf(el) < 0) {
         resizeObserver.observe(el);
@@ -244,7 +264,7 @@
      quedan atados a ese antepasado en vez de a la pantalla. Se anulan esas propiedades. */
   var neutralized = [];
   var UNCLAMP = [['transform', 'none'], ['filter', 'none'], ['perspective', 'none'], ['contain', 'none'],
-    ['container-type', 'normal'], ['will-change', 'auto'], ['backdrop-filter', 'none']];
+    ['container-type', 'normal'], ['will-change', 'auto'], ['backdrop-filter', 'none'], ['transition', 'none']];
 
   function clampsFixed(cs) {
     return cs.transform !== 'none' || cs.filter !== 'none' || cs.perspective !== 'none' ||
