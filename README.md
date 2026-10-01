@@ -57,8 +57,9 @@ Requiere Android 15 o superior en el teléfono.
 - **Desde el teléfono:** abre AutoYouTube, escribe una búsqueda o pega un enlace y toca
   **Enviar al auto**. O en la app de YouTube: **Compartir → AutoYouTube**.
 
-- **Tablero del auto:** la app no se registra como app de música en Android Auto: con eso Android
-  Auto abría una pantalla de música vacía en vez del video.
+- **Tablero del auto:** el tablero muestra el título, el canal y el tiempo del video (probado en un
+  Ford Fusion con SYNC 3). La app no se registra como app de música: con eso Android Auto abría una
+  pantalla de música vacía en vez del video, y no hace falta para el tablero.
 - **Probar sin ir al auto:** en la app del teléfono, "Probar en el teléfono" abre la pantalla del
   auto en horizontal. "Copiar diagnóstico" copia cómo está armada la página para ajustar el diseño.
 
