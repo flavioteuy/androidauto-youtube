@@ -10,6 +10,20 @@
   if (window.__autoVideoTweaks) return;
   window.__autoVideoTweaks = true;
 
+  /* ---------- Lo que suena, para el tablero del auto y los botones del volante ----------
+     Se guardan las acciones que YouTube registra (siguiente, anterior...) para poder llamarlas. */
+  var mediaHandlers = {};
+  try {
+    var ms = navigator.mediaSession;
+    if (ms && ms.setActionHandler) {
+      var originalSetHandler = ms.setActionHandler.bind(ms);
+      ms.setActionHandler = function (action, handler) {
+        mediaHandlers[action] = handler;
+        try { return originalSetHandler(action, handler); } catch (e) { return undefined; }
+      };
+    }
+  } catch (e) { /* sin Media Session */ }
+
   var CSS = [
     /* ---------- General ---------- */
     'html[data-autovideo] { -webkit-tap-highlight-color: transparent; }',
@@ -384,12 +398,132 @@
   window.addEventListener('popstate', schedule);
   window.addEventListener('resize', function () { measureRight(); });
 
+  /* ---------- Reproducción: datos para el tablero y acciones del volante ---------- */
+  function mainVideo() {
+    return document.querySelector('.html5-main-video') || document.querySelector('video');
+  }
+
+  function clickFirst(selectors) {
+    for (var i = 0; i < selectors.length; i++) {
+      var b = document.querySelector(selectors[i]);
+      if (b) { b.click(); return true; }
+    }
+    return false;
+  }
+
+  /* El reproductor de YouTube expone su estado (duración, tiempo, estado); se usa si está. */
+  function ytPlayer() {
+    var p = document.getElementById('movie_player');
+    return p && typeof p.getPlayerState === 'function' ? p : null;
+  }
+
+  window.__avMediaAction = function (action, arg) {
+    var v = mainVideo();
+    var yt = ytPlayer();
+    if (action === 'play') {
+      if (yt && yt.playVideo) { yt.playVideo(); return; }
+      if (v) { var p = v.play(); if (p && p.catch) p.catch(function () {}); }
+      return;
+    }
+    if (action === 'pause') {
+      if (yt && yt.pauseVideo) { yt.pauseVideo(); return; }
+      if (v) v.pause();
+      return;
+    }
+    if (action === 'seekto') {
+      if (!isFinite(arg)) return;
+      if (yt && yt.seekTo) { yt.seekTo(arg, true); return; }
+      if (v) v.currentTime = arg;
+      return;
+    }
+    var h = mediaHandlers[action];
+    if (h) { try { h({ action: action }); return; } catch (e) { /* se prueba lo siguiente */ } }
+    if (action === 'nexttrack') {
+      clickFirst(['.ytp-next-button', 'button[aria-label*="iguiente"]', 'button[aria-label*="Next"]']);
+    } else if (action === 'previoustrack') {
+      if (v && v.currentTime > 3) v.currentTime = 0; else history.back();
+    }
+  };
+
+  var lastMediaKey = '';
+  var lastMediaForced = 0;
+  function reportMedia(force) {
+    var bridge = window.AutoVideoMedia;
+    if (!bridge || !bridge.update) return;
+    var v = mainVideo();
+    var yt = ytPlayer();
+    var data = null;
+    try { data = yt && yt.getVideoData ? yt.getVideoData() : null; } catch (e) { data = null; }
+    var md = navigator.mediaSession ? navigator.mediaSession.metadata : null;
+    var title = (md && md.title) || (data && data.title) || '';
+    var artist = (md && md.artist) || (data && data.author) || '';
+    var art = '';
+    if (md && md.artwork && md.artwork.length) art = md.artwork[md.artwork.length - 1].src || '';
+    if (!art && data && data.video_id) art = 'https://i.ytimg.com/vi/' + data.video_id + '/hqdefault.jpg';
+    if (!title && location.pathname.indexOf('/watch') === 0) {
+      title = (document.title || '').replace(/\s*-\s*YouTube\s*$/, '');
+    }
+
+    // Tiempo y estado: del elemento de video si ya cargó; si no, del reproductor de YouTube.
+    var duration = 0, position = 0, playing = false, buffering = false;
+    if (v && v.readyState > 0) {
+      duration = isFinite(v.duration) ? v.duration : 0;
+      position = v.currentTime;
+      playing = !v.paused && !v.ended;
+      buffering = playing && v.readyState < 3;
+    } else if (yt) {
+      try {
+        var st = yt.getPlayerState();       // 1 reproduciendo, 2 pausa, 3 cargando, 0 terminado
+        duration = yt.getDuration() || 0;
+        position = yt.getCurrentTime() || 0;
+        playing = st === 1 || st === 3;
+        buffering = st === 3;
+      } catch (e) { /* reproductor no listo */ }
+    }
+    var hasMedia = !!(v && (v.currentSrc || v.src || v.srcObject)) || duration > 0;
+    var state = {
+      has: hasMedia && !!title,
+      t: title,
+      a: artist,
+      art: art,
+      d: Math.round(duration * 1000),
+      p: Math.round(position * 1000),
+      playing: playing,
+      buf: buffering,
+      r: v ? v.playbackRate : 1
+    };
+    var key = JSON.stringify([state.has, state.t, state.a, state.art, state.d, state.playing, state.buf, state.r]);
+    var now = Date.now();
+    // Sin cambios no se manda nada; cada 20 s se reenvía la posición por si el auto se desfasó.
+    if (!force && key === lastMediaKey && now - lastMediaForced < 20000) return;
+    lastMediaKey = key;
+    lastMediaForced = now;
+    try { bridge.update(JSON.stringify(state)); } catch (e) { /* la app no está */ }
+  }
+
+  var mediaPending = false;
+  function scheduleMedia(force) {
+    if (force) { reportMedia(true); return; }
+    if (mediaPending) return;
+    mediaPending = true;
+    setTimeout(function () { mediaPending = false; reportMedia(false); }, 300);
+  }
+
+  ['play', 'playing', 'pause', 'waiting', 'seeked', 'ratechange', 'durationchange',
+    'loadedmetadata', 'ended', 'emptied'].forEach(function (ev) {
+    document.addEventListener(ev, function (e) {
+      if (!e.target || e.target.tagName !== 'VIDEO') return;
+      scheduleMedia(ev === 'seeked' || ev === 'playing' || ev === 'pause' || ev === 'ratechange');
+    }, true);
+  });
+
   function start() {
     updateMode();
     hideOpenApp();
     measureRight();
     new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
     setInterval(function () { updateMode(); measureRight(); }, 1000);
+    setInterval(function () { reportMedia(false); }, 2000);
   }
 
   if (document.documentElement) {

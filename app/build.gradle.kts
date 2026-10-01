@@ -11,8 +11,8 @@ android {
         applicationId = "uy.autovideo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 8
-        versionName = "2.6"
+        versionCode = 9
+        versionName = "2.7"
     }
 
     signingConfigs {
@@ -48,4 +48,6 @@ dependencies {
     implementation("androidx.core:core:1.13.1")
     // Inyectar los ajustes de diseño al inicio de cada página de YouTube
     implementation("androidx.webkit:webkit:1.12.1")
+    // Sesión de reproducción para el tablero del auto y los botones del volante
+    implementation("androidx.media:media:1.7.0")
 }

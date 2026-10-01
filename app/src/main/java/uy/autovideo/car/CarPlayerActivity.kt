@@ -18,6 +18,7 @@ import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
 import android.webkit.CookieManager
+import android.webkit.JavascriptInterface
 import android.webkit.WebChromeClient
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -29,7 +30,9 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import org.json.JSONObject
 import org.json.JSONTokener
+import uy.autovideo.media.NowPlaying
 import uy.autovideo.R
 import uy.autovideo.shared.CarBridge
 import uy.autovideo.shared.ScreenDiag
@@ -64,6 +67,26 @@ class CarPlayerActivity : Activity() {
     }
 
     private val bridgeListener: (String) -> Unit = { url -> load(url) }
+
+    private var destroyed = false
+    private var dashboardEnabled = true
+
+    /** Botones del volante y del tablero → reproductor de YouTube. */
+    private val mediaController = object : NowPlaying.Controller {
+        override fun play() = mediaAction("play")
+        override fun pause() = mediaAction("pause")
+        override fun next() = mediaAction("nexttrack")
+        override fun previous() = mediaAction("previoustrack")
+        override fun seekTo(positionMs: Long) = mediaAction("seekto", positionMs / 1000.0)
+    }
+
+    /** Recibe de la página lo que está sonando (título, canal, tiempo). */
+    inner class MediaJsBridge {
+        @JavascriptInterface
+        fun update(json: String) {
+            main.post { onMediaUpdate(json) }
+        }
+    }
 
     // Diagnóstico: se captura la estructura de cada página de video a los 6 y a los 20 segundos.
     private val main = Handler(Looper.getMainLooper())
@@ -101,6 +124,7 @@ class CarPlayerActivity : Activity() {
             !restored -> load(YouTubeLinks.HOME)
         }
         CarBridge.addListener(bridgeListener)
+        NowPlaying.controller = mediaController
     }
 
     override fun onNewIntent(intent: Intent) {
@@ -112,6 +136,7 @@ class CarPlayerActivity : Activity() {
 
     override fun onStart() {
         super.onStart()
+        dashboardEnabled = NowPlaying.isEnabled(this)
         motionGuard.start()
         main.removeCallbacks(diagTick)
         main.postDelayed(diagTick, DIAG_TICK_MS)
@@ -122,6 +147,38 @@ class CarPlayerActivity : Activity() {
         motionGuard.stop()
         showLock(false)
         super.onStop()
+    }
+
+    private fun mediaAction(action: String, arg: Double? = null) {
+        main.post {
+            if (destroyed) return@post
+            val argJs = if (arg != null) ", $arg" else ""
+            webView.evaluateJavascript("window.__avMediaAction && window.__avMediaAction('$action'$argJs)", null)
+        }
+    }
+
+    private fun onMediaUpdate(json: String) {
+        if (destroyed || !dashboardEnabled) return
+        try {
+            val o = JSONObject(json)
+            if (!o.optBoolean("has")) {
+                NowPlaying.stop()
+                return
+            }
+            NowPlaying.update(
+                context = this,
+                newTitle = o.optString("t"),
+                newArtist = o.optString("a"),
+                newDurationMs = o.optLong("d"),
+                positionMs = o.optLong("p"),
+                playing = o.optBoolean("playing"),
+                buffering = o.optBoolean("buf"),
+                rate = o.optDouble("r", 1.0).toFloat(),
+                artworkUrl = o.optString("art"),
+            )
+        } catch (e: Exception) {
+            Log.w(TAG, "Datos de reproducción inválidos", e)
+        }
     }
 
     /** Abierta desde la app del teléfono para probar: en horizontal, como la pantalla del auto. */
@@ -161,7 +218,12 @@ class CarPlayerActivity : Activity() {
     }
 
     override fun onDestroy() {
+        destroyed = true
         CarBridge.removeListener(bridgeListener)
+        if (NowPlaying.controller === mediaController) {
+            NowPlaying.controller = null
+            NowPlaying.stop()
+        }
         motionGuard.stop()
         exitFullscreen(notifyPage = true)
         (webView.parent as? ViewGroup)?.removeView(webView)
@@ -295,6 +357,8 @@ class CarPlayerActivity : Activity() {
             setAcceptCookie(true)
             setAcceptThirdPartyCookies(webView, true)
         }
+        // Lo que suena, para el tablero del auto (ver assets/youtube_tweaks.js).
+        webView.addJavascriptInterface(MediaJsBridge(), "AutoVideoMedia")
 
         // Ajustes de diseño desde el primer instante de cada página (sin parpadeo).
         if (tweaksJs.isNotEmpty() && WebViewFeature.isFeatureSupported(WebViewFeature.DOCUMENT_START_SCRIPT)) {
