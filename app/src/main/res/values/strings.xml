@@ -23,6 +23,15 @@
     <string name="motion_speed_label">Velocidad: más de %1$d km/h</string>
     <string name="motion_seconds_label">Durante: %1$d segundos seguidos (máx. 7200)</string>
 
+    <!-- Probar en el teléfono y diagnóstico -->
+    <string name="diag_title">Pantalla del auto</string>
+    <string name="diag_desc">Puedes probar la pantalla del auto aquí mismo, en horizontal. Si algo se ve mal: abre un video común y uno de un Mix, espera unos 20 segundos en cada uno, vuelve aquí y toca Copiar diagnóstico para pegarlo en el chat. Solo copia cómo está armada la página, no tus datos.</string>
+    <string name="preview_button">Probar en el teléfono</string>
+    <string name="diag_copy_button">Copiar diagnóstico</string>
+    <string name="diag_status_none">Diagnóstico: todavía no hay. Abre un video (en el auto o en el teléfono) y espera unos 20 segundos.</string>
+    <string name="diag_status_fmt">Diagnóstico listo: video común %1$s · Mix %2$s</string>
+    <string name="diag_copied">Diagnóstico copiado. Pégalo en el chat.</string>
+
     <!-- Activación -->
     <string name="setup_title">Activarlo en Android Auto (una sola vez)</string>
     <string name="setup_steps">1. Abre los ajustes de Android Auto en el teléfono (Ajustes → Dispositivos conectados → Preferencias de conexión → Android Auto).\n2. Baja hasta \"Versión\" y tócala unas 10 veces hasta que te pregunte si quieres activar los ajustes para desarrolladores. Acepta.\n3. Menú ⋮ (arriba a la derecha) → Configuración para desarrolladores → activa \"Fuentes desconocidas\".\n4. En los ajustes de Android Auto → Personalizar launcher, asegúrate de que AutoYouTube esté marcado.\n5. Con el auto estacionado, abre AutoYouTube desde el menú de apps de Android Auto.</string>

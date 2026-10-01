@@ -108,6 +108,32 @@
                 android:layout_height="40dp" />
         </LinearLayout>
 
+        <!-- Probar la pantalla del auto en el teléfono y copiar el diagnóstico -->
+        <LinearLayout style="@style/CardBox">
+
+            <TextView
+                style="@style/CardTitle"
+                android:text="@string/diag_title" />
+
+            <TextView
+                style="@style/BodyText"
+                android:text="@string/diag_desc" />
+
+            <Button
+                android:id="@+id/phone_preview_button"
+                style="@style/AccentButton"
+                android:text="@string/preview_button" />
+
+            <Button
+                android:id="@+id/diag_copy_button"
+                style="@style/AccentButton"
+                android:text="@string/diag_copy_button" />
+
+            <TextView
+                android:id="@+id/diag_status"
+                style="@style/BodyText" />
+        </LinearLayout>
+
         <!-- Instrucciones -->
         <LinearLayout style="@style/CardBox">
 

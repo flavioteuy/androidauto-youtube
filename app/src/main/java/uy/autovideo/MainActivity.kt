@@ -2,8 +2,11 @@ package uy.autovideo
 
 import android.Manifest
 import android.app.Activity
+import android.content.ClipData
+import android.content.ClipboardManager
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.view.View
 import android.view.inputmethod.EditorInfo
@@ -12,8 +15,11 @@ import android.widget.Button
 import android.widget.EditText
 import android.widget.SeekBar
 import android.widget.TextView
+import android.widget.Toast
+import uy.autovideo.car.CarPlayerActivity
 import uy.autovideo.shared.CarBridge
 import uy.autovideo.shared.MotionSettings
+import uy.autovideo.shared.ScreenDiag
 import uy.autovideo.shared.YouTubeLinks
 
 /** App del teléfono: enviar videos al auto, permisos e instrucciones. */
@@ -45,6 +51,14 @@ class MainActivity : Activity() {
         permButton.setOnClickListener { requestPermissionsNow() }
         setUpMotionSettings()
 
+        findViewById<Button>(R.id.phone_preview_button).setOnClickListener {
+            startActivity(
+                Intent(this, CarPlayerActivity::class.java)
+                    .putExtra(CarPlayerActivity.EXTRA_PHONE_PREVIEW, true)
+            )
+        }
+        findViewById<Button>(R.id.diag_copy_button).setOnClickListener { copyDiagnostic() }
+
         handleShareIntent(intent)
     }
 
@@ -57,7 +71,40 @@ class MainActivity : Activity() {
     override fun onResume() {
         super.onResume()
         updatePermissionUi()
+        updateDiagStatus()
     }
+
+    private fun updateDiagStatus() {
+        val status = findViewById<TextView>(R.id.diag_status)
+        val video = ScreenDiag.has(this, ScreenDiag.VIDEO)
+        val mix = ScreenDiag.has(this, ScreenDiag.MIX)
+        status.text = if (!video && !mix) {
+            getString(R.string.diag_status_none)
+        } else {
+            getString(R.string.diag_status_fmt, if (video) "✓" else "—", if (mix) "✓" else "—")
+        }
+    }
+
+    private fun copyDiagnostic() {
+        val header = "AutoYouTube ${appVersion()} · Android ${Build.VERSION.RELEASE} · ${Build.MODEL}"
+        val text = ScreenDiag.combined(this, header)
+        if (text == null) {
+            updateDiagStatus()
+            Toast.makeText(this, R.string.diag_status_none, Toast.LENGTH_LONG).show()
+            return
+        }
+        getSystemService(ClipboardManager::class.java)
+            ?.setPrimaryClip(ClipData.newPlainText("AutoYouTube diagnóstico", text))
+        Toast.makeText(this, R.string.diag_copied, Toast.LENGTH_LONG).show()
+    }
+
+    @Suppress("DEPRECATION")
+    private fun appVersion(): String =
+        try {
+            packageManager.getPackageInfo(packageName, 0).versionName ?: "?"
+        } catch (e: Exception) {
+            "?"
+        }
 
     private fun handleShareIntent(intent: Intent?) {
         if (intent?.action != Intent.ACTION_SEND) return

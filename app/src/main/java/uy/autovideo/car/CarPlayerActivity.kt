@@ -3,9 +3,13 @@ package uy.autovideo.car
 import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
+import android.content.pm.ActivityInfo
 import android.graphics.Color
 import android.os.Build
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
+import android.os.SystemClock
 import android.util.Log
 import android.view.View
 import android.view.ViewGroup
@@ -25,8 +29,10 @@ import android.widget.ImageButton
 import android.widget.TextView
 import androidx.webkit.WebViewCompat
 import androidx.webkit.WebViewFeature
+import org.json.JSONTokener
 import uy.autovideo.R
 import uy.autovideo.shared.CarBridge
+import uy.autovideo.shared.ScreenDiag
 import uy.autovideo.shared.SearchHistory
 import uy.autovideo.shared.YouTubeLinks
 
@@ -59,8 +65,21 @@ class CarPlayerActivity : Activity() {
 
     private val bridgeListener: (String) -> Unit = { url -> load(url) }
 
+    // Diagnóstico: se captura la estructura de cada página de video a los 6 y a los 20 segundos.
+    private val main = Handler(Looper.getMainLooper())
+    private var diagUrl: String? = null
+    private var diagSince = 0L
+    private var diagStage = 0
+    private val diagTick = object : Runnable {
+        override fun run() {
+            checkDiag()
+            main.postDelayed(this, DIAG_TICK_MS)
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        applyPhonePreview(intent)
         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         setContentView(R.layout.activity_car_player)
 
@@ -87,18 +106,53 @@ class CarPlayerActivity : Activity() {
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
         setIntent(intent)
+        applyPhonePreview(intent)
         CarBridge.consumePending()?.let { load(it) }
     }
 
     override fun onStart() {
         super.onStart()
         motionGuard.start()
+        main.removeCallbacks(diagTick)
+        main.postDelayed(diagTick, DIAG_TICK_MS)
     }
 
     override fun onStop() {
+        main.removeCallbacks(diagTick)
         motionGuard.stop()
         showLock(false)
         super.onStop()
+    }
+
+    /** Abierta desde la app del teléfono para probar: en horizontal, como la pantalla del auto. */
+    private fun applyPhonePreview(intent: Intent?) {
+        if (intent?.getBooleanExtra(EXTRA_PHONE_PREVIEW, false) == true) {
+            requestedOrientation = ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE
+        }
+    }
+
+    private fun checkDiag() {
+        val url = webView.url ?: return
+        val now = SystemClock.elapsedRealtime()
+        if (url != diagUrl) {
+            diagUrl = url
+            diagSince = now
+            diagStage = 0
+        }
+        if (!url.contains("/watch")) return
+        val age = now - diagSince
+        val due = (diagStage == 0 && age >= DIAG_FIRST_MS) || (diagStage == 1 && age >= DIAG_SECOND_MS)
+        if (!due) return
+        diagStage++
+        val kind = if (url.contains("list=")) ScreenDiag.MIX else ScreenDiag.VIDEO
+        webView.evaluateJavascript("(window.__avDiag ? window.__avDiag() : 'sin __avDiag')") { result ->
+            val text = try {
+                JSONTokener(result).nextValue() as? String ?: result
+            } catch (e: Exception) {
+                result
+            }
+            if (!text.isNullOrBlank()) ScreenDiag.save(this, kind, text)
+        }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -344,9 +398,15 @@ class CarPlayerActivity : Activity() {
         if (moving) lockView.bringToFront()
     }
 
-    private companion object {
-        const val TAG = "AutoVideo"
-        const val TWEAKS_ASSET = "youtube_tweaks.js"
-        val YOUTUBE_ORIGINS = setOf("https://m.youtube.com", "https://www.youtube.com", "https://youtube.com")
+    companion object {
+        /** Extra para abrir esta pantalla en el teléfono (vista previa en horizontal). */
+        const val EXTRA_PHONE_PREVIEW = "uy.autovideo.PHONE_PREVIEW"
+
+        private const val TAG = "AutoVideo"
+        private const val TWEAKS_ASSET = "youtube_tweaks.js"
+        private const val DIAG_TICK_MS = 3_000L
+        private const val DIAG_FIRST_MS = 6_000L
+        private const val DIAG_SECOND_MS = 20_000L
+        private val YOUTUBE_ORIGINS = setOf("https://m.youtube.com", "https://www.youtube.com", "https://youtube.com")
     }
 }
