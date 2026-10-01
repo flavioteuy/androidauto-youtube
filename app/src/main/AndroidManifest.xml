@@ -60,25 +60,8 @@
             </intent-filter>
         </activity>
 
-        <!--
-          Servicio de música: Android Auto se conecta a él para mostrar en el tablero del auto
-          lo que suena (título, canal, tiempo) y para recibir los botones del volante.
-          Se puede apagar desde la app del teléfono ("Mostrar en el tablero del auto").
-        -->
-        <service
-            android:name=".media.NowPlayingService"
-            android:enabled="true"
-            android:exported="true"
-            android:icon="@mipmap/ic_launcher"
-            android:label="@string/media_service_label">
-            <intent-filter>
-                <action android:name="android.media.browse.MediaBrowserService" />
-            </intent-filter>
-        </service>
-
-        <meta-data
-            android:name="com.google.android.gms.car.application"
-            android:resource="@xml/automotive_app_desc" />
+        <!-- Sin servicio de música ni declaración "media": con eso Android Auto abría una pantalla
+             de música vacía en vez del video. La sesión de reproducción queda dentro de la app. -->
 
     </application>
 </manifest>

@@ -69,7 +69,6 @@ class CarPlayerActivity : Activity() {
     private val bridgeListener: (String) -> Unit = { url -> load(url) }
 
     private var destroyed = false
-    private var dashboardEnabled = true
 
     /** Botones del volante y del tablero → reproductor de YouTube. */
     private val mediaController = object : NowPlaying.Controller {
@@ -136,7 +135,6 @@ class CarPlayerActivity : Activity() {
 
     override fun onStart() {
         super.onStart()
-        dashboardEnabled = NowPlaying.isEnabled(this)
         motionGuard.start()
         main.removeCallbacks(diagTick)
         main.postDelayed(diagTick, DIAG_TICK_MS)
@@ -158,7 +156,7 @@ class CarPlayerActivity : Activity() {
     }
 
     private fun onMediaUpdate(json: String) {
-        if (destroyed || !dashboardEnabled) return
+        if (destroyed) return
         try {
             val o = JSONObject(json)
             if (!o.optBoolean("has")) {

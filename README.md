@@ -57,10 +57,8 @@ Requiere Android 15 o superior en el teléfono.
 - **Desde el teléfono:** abre AutoYouTube, escribe una búsqueda o pega un enlace y toca
   **Enviar al auto**. O en la app de YouTube: **Compartir → AutoYouTube**.
 
-- **Tablero del auto:** con "Mostrar en el tablero del auto" activado (app del teléfono), el
-  tablero y la pantalla de Android Auto muestran el título, el canal y el tiempo del video, y
-  funcionan los botones del volante (pausa, siguiente, anterior). Si con esto AutoYouTube deja de
-  abrir el video en el auto, apágalo.
+- **Tablero del auto:** la app no se registra como app de música en Android Auto: con eso Android
+  Auto abría una pantalla de música vacía en vez del video.
 - **Probar sin ir al auto:** en la app del teléfono, "Probar en el teléfono" abre la pantalla del
   auto en horizontal. "Copiar diagnóstico" copia cómo está armada la página para ajustar el diseño.
 

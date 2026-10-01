@@ -1,8 +1,6 @@
 package uy.autovideo.media
 
-import android.content.ComponentName
 import android.content.Context
-import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Bundle
@@ -19,8 +17,8 @@ import java.net.URL
 import java.util.concurrent.Executors
 
 /**
- * Sesión de reproducción que Android Auto lee para mostrar en el tablero del auto el título,
- * el canal y el tiempo del video, y para recibir los botones del volante.
+ * Sesión de reproducción con el título, el canal y el tiempo del video, y las acciones
+ * (reproducir, pausa, siguiente, anterior, adelantar) que se envían al reproductor de YouTube.
  * Los datos los manda la página de YouTube (assets/youtube_tweaks.js) a través de CarPlayerActivity.
  */
 object NowPlaying {
@@ -58,24 +56,6 @@ object NowPlaying {
     private var durationMs = 0L
     private var artUrl = ""
     private var art: Bitmap? = null
-
-    /** Si el usuario apagó "Mostrar en el tablero", el servicio queda desactivado. */
-    fun isEnabled(context: Context): Boolean {
-        val state = context.packageManager.getComponentEnabledSetting(
-            ComponentName(context, NowPlayingService::class.java)
-        )
-        return state != PackageManager.COMPONENT_ENABLED_STATE_DISABLED
-    }
-
-    fun setEnabled(context: Context, enabled: Boolean) {
-        context.packageManager.setComponentEnabledSetting(
-            ComponentName(context, NowPlayingService::class.java),
-            if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-            else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-            PackageManager.DONT_KILL_APP
-        )
-        if (!enabled) stop()
-    }
 
     fun session(context: Context): MediaSessionCompat {
         session?.let { return it }

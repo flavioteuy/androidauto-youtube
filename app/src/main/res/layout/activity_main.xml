@@ -108,24 +108,6 @@
                 android:layout_height="40dp" />
         </LinearLayout>
 
-        <!-- Tablero del auto: lo que suena y botones del volante -->
-        <LinearLayout style="@style/CardBox">
-
-            <Switch
-                android:id="@+id/dashboard_switch"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:minHeight="48dp"
-                android:text="@string/dashboard_title"
-                android:textColor="@color/text"
-                android:textSize="18sp"
-                android:textStyle="bold" />
-
-            <TextView
-                style="@style/BodyText"
-                android:text="@string/dashboard_desc" />
-        </LinearLayout>
-
         <!-- Probar la pantalla del auto en el teléfono y copiar el diagnóstico -->
         <LinearLayout style="@style/CardBox">
 

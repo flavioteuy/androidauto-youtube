@@ -14,11 +14,9 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.SeekBar
-import android.widget.Switch
 import android.widget.TextView
 import android.widget.Toast
 import uy.autovideo.car.CarPlayerActivity
-import uy.autovideo.media.NowPlaying
 import uy.autovideo.shared.CarBridge
 import uy.autovideo.shared.MotionSettings
 import uy.autovideo.shared.ScreenDiag
@@ -61,9 +59,6 @@ class MainActivity : Activity() {
         }
         findViewById<Button>(R.id.diag_copy_button).setOnClickListener { copyDiagnostic() }
 
-        val dashboard = findViewById<Switch>(R.id.dashboard_switch)
-        dashboard.isChecked = NowPlaying.isEnabled(this)
-        dashboard.setOnCheckedChangeListener { _, checked -> NowPlaying.setEnabled(this, checked) }
 
         handleShareIntent(intent)
     }
