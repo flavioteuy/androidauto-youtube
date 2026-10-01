@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">AutoVideo</string>
+    <string name="app_name">AutoYouTube</string>
     <string name="tagline">Videos de YouTube en la pantalla de Android Auto, con el auto estacionado</string>
     <string name="share_label">Ver en el auto</string>
 
@@ -8,15 +8,15 @@
     <string name="send_title">Enviar un video al auto</string>
     <string name="send_hint">Busca algo o pega un enlace de YouTube</string>
     <string name="send_button">Enviar al auto</string>
-    <string name="share_tip">Atajo: en la app de YouTube toca Compartir → AutoVideo y el video se abre en el auto.</string>
+    <string name="share_tip">Atajo: en la app de YouTube toca Compartir → AutoYouTube y el video se abre en el auto.</string>
     <string name="status_empty">Escribe una búsqueda o pega un enlace.</string>
     <string name="status_not_youtube">Ese enlace no es de YouTube.</string>
     <string name="status_sent">Listo: míralo en la pantalla del auto.</string>
-    <string name="status_pending">Guardado: se abrirá cuando abras AutoVideo en Android Auto.</string>
+    <string name="status_pending">Guardado: se abrirá cuando abras AutoYouTube en Android Auto.</string>
 
     <!-- Permisos y protección en movimiento -->
     <string name="perm_title">Protección en movimiento (GPS)</string>
-    <string name="perm_missing">Android Auto ya bloquea AutoVideo cuando manejas. Con el permiso de ubicación, además, la app tapa la imagen si el GPS detecta que el auto se mueve (el audio sigue).</string>
+    <string name="perm_missing">Android Auto ya bloquea AutoYouTube cuando manejas. Con el permiso de ubicación, además, la app tapa la imagen si el GPS detecta que el auto se mueve (el audio sigue).</string>
     <string name="perm_ok">Permiso concedido. Si el GPS detecta movimiento sostenido, la imagen se tapa (el audio sigue).</string>
     <string name="perm_button">Conceder permiso</string>
     <string name="motion_desc">Para que el GPS no tape la imagen por error con el auto estacionado, solo cuenta el movimiento sostenido:</string>
@@ -25,7 +25,7 @@
 
     <!-- Activación -->
     <string name="setup_title">Activarlo en Android Auto (una sola vez)</string>
-    <string name="setup_steps">1. Abre los ajustes de Android Auto en el teléfono (Ajustes → Dispositivos conectados → Preferencias de conexión → Android Auto).\n2. Baja hasta \"Versión\" y tócala unas 10 veces hasta que te pregunte si quieres activar los ajustes para desarrolladores. Acepta.\n3. Menú ⋮ (arriba a la derecha) → Configuración para desarrolladores → activa \"Fuentes desconocidas\".\n4. En los ajustes de Android Auto → Personalizar launcher, asegúrate de que AutoVideo esté marcado.\n5. Con el auto estacionado, abre AutoVideo desde el menú de apps de Android Auto.</string>
+    <string name="setup_steps">1. Abre los ajustes de Android Auto en el teléfono (Ajustes → Dispositivos conectados → Preferencias de conexión → Android Auto).\n2. Baja hasta \"Versión\" y tócala unas 10 veces hasta que te pregunte si quieres activar los ajustes para desarrolladores. Acepta.\n3. Menú ⋮ (arriba a la derecha) → Configuración para desarrolladores → activa \"Fuentes desconocidas\".\n4. En los ajustes de Android Auto → Personalizar launcher, asegúrate de que AutoYouTube esté marcado.\n5. Con el auto estacionado, abre AutoYouTube desde el menú de apps de Android Auto.</string>
 
     <!-- Pantalla del auto -->
     <string name="search_hint">Buscar en YouTube</string>

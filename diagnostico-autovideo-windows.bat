@@ -1,6 +1,6 @@
 @echo off
 setlocal
-title Diagnostico de AutoVideo
+title Diagnostico de AutoYouTube
 color 0E
 
 rem ------------------------------------------------------------------
@@ -22,7 +22,7 @@ if not exist "%DIR%" mkdir "%DIR%"
 
 echo.
 echo  ==================================================
-echo    Diagnostico de AutoVideo
+echo    Diagnostico de AutoYouTube
 echo  ==================================================
 echo.
 

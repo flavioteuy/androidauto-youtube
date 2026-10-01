@@ -6,5 +6,5 @@
     <color name="muted">#FF5A6470</color>
     <color name="accent">#FF0F766E</color>
     <color name="on_accent">#FFFFFFFF</color>
-    <color name="ic_launcher_background">#FF0F766E</color>
+    <color name="ic_launcher_background">#FFFF7A00</color>
 </resources>

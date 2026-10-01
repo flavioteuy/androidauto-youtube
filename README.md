@@ -1,4 +1,4 @@
-# AutoVideo — YouTube en la pantalla de Android Auto (con el auto estacionado)
+# AutoYouTube — YouTube en la pantalla de Android Auto (con el auto estacionado)
 
 App para Android que muestra YouTube (versión móvil) en la pantalla del auto a través de Android Auto,
 **solo con el vehículo estacionado**. Se maneja tocando la pantalla del auto como en el celular, o
@@ -7,7 +7,7 @@ enviando videos desde el teléfono.
 ## Cómo funciona
 
 Android Auto solo muestra apps instaladas por fuera de Play Store si son de ciertos tipos. Las apps
-de "plantillas" (como la versión 1 de AutoVideo) **no** están incluidas, por eso Android Auto las
+de "plantillas" (como la versión 1 de AutoYouTube) **no** están incluidas, por eso Android Auto las
 rechaza (`CAR.VALIDATOR: Package DENIED`). Las apps **"para usar estacionado"** sí lo están, siempre
 que "Fuentes desconocidas" esté activado en los ajustes para desarrolladores de Android Auto.
 
@@ -42,8 +42,8 @@ El APK también se puede bajar directo:
 1. Ajustes de Android Auto → baja hasta **Versión** y tócala unas 10 veces → acepta los ajustes
    para desarrolladores.
 2. Menú **⋮** → **Configuración para desarrolladores** → activa **Fuentes desconocidas**.
-3. Ajustes de Android Auto → **Personalizar launcher** → marca **AutoVideo**.
-4. Con el auto estacionado, abre AutoVideo desde el menú de apps de Android Auto.
+3. Ajustes de Android Auto → **Personalizar launcher** → marca **AutoYouTube**.
+4. Con el auto estacionado, abre AutoYouTube desde el menú de apps de Android Auto.
 
 Requiere Android 15 o superior en el teléfono.
 
@@ -54,8 +54,8 @@ Requiere Android 15 o superior en el teléfono.
   recientes). Mientras ves un video, la lista de videos queda a la izquierda y el reproductor a la
   derecha, con el título y los botones debajo. Para verlo en grande, usa el botón de pantalla
   completa del reproductor.
-- **Desde el teléfono:** abre AutoVideo, escribe una búsqueda o pega un enlace y toca
-  **Enviar al auto**. O en la app de YouTube: **Compartir → AutoVideo**.
+- **Desde el teléfono:** abre AutoYouTube, escribe una búsqueda o pega un enlace y toca
+  **Enviar al auto**. O en la app de YouTube: **Compartir → AutoYouTube**.
 
 ## 4. Si no aparece en Android Auto
 

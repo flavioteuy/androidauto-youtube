@@ -1,6 +1,6 @@
 @echo off
 setlocal
-title Instalar AutoVideo
+title Instalar AutoYouTube
 color 0B
 
 rem ------------------------------------------------------------------
@@ -19,7 +19,7 @@ cd /d "%DIR%"
 
 echo.
 echo  ==================================================
-echo    Instalador de AutoVideo para Android Auto
+echo    Instalador de AutoYouTube para Android Auto
 echo  ==================================================
 echo.
 
@@ -36,7 +36,7 @@ if exist "%ADB%" (
 if not exist "%ADB%" goto :err_download
 
 rem ---- 2. APK de AutoVideo ----
-echo  [2/5] Descargando la ultima version de AutoVideo...
+echo  [2/5] Descargando la ultima version de AutoYouTube...
 curl.exe -L --fail --progress-bar -o "%APK%" "%APK_URL%"
 if errorlevel 1 goto :err_apk
 
@@ -64,7 +64,7 @@ echo        Telefono encontrado.
 
 rem ---- 4. Instalar (instalacion normal: Android Auto acepta apps "para estacionado"
 rem         instaladas por fuera de Play Store si "Fuentes desconocidas" esta activado) ----
-echo  [4/5] Instalando AutoVideo...
+echo  [4/5] Instalando AutoYouTube...
 rem Primero se actualiza encima (conserva la sesion de YouTube y los ajustes).
 "%ADB%" install -r "%APK%" > "%DIR%\install.log" 2>&1
 findstr /c:"Success" "%DIR%\install.log" >nul
@@ -93,14 +93,14 @@ echo  [5/5] Reiniciando Android Auto...
 
 echo.
 echo  ==================================================
-echo    LISTO. AutoVideo quedo instalado.
+echo    LISTO. AutoYouTube quedo instalado.
 echo  ==================================================
 echo.
 echo   Ahora:
 echo    1. En el telefono, revisa en los ajustes para desarrolladores
 echo       de Android Auto que "Fuentes desconocidas" siga activado.
 echo    2. Ajustes de Android Auto - Personalizar launcher:
-echo       AutoVideo deberia aparecer. Marcalo.
+echo       AutoYouTube deberia aparecer. Marcalo.
 echo    3. Con el auto estacionado, abrelo desde el menu de apps
 echo       de Android Auto.
 echo.
@@ -118,7 +118,7 @@ goto :end_error
 
 :err_apk
 echo.
-echo  ERROR: no se pudo descargar AutoVideo desde GitHub.
+echo  ERROR: no se pudo descargar AutoYouTube desde GitHub.
 echo  Revisa la conexion a internet y vuelve a ejecutar este archivo.
 goto :end_error
 
@@ -140,7 +140,7 @@ goto :end_error
 
 :err_installer
 echo.
-echo  AVISO: AutoVideo se instalo, pero el telefono no acepto marcarlo
+echo  AVISO: AutoYouTube se instalo, pero el telefono no acepto marcarlo
 echo  como instalado desde Play Store. Avisale a Claude.
 goto :end_error
 

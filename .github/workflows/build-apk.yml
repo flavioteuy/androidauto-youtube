@@ -42,6 +42,6 @@ jobs:
         run: |
           cp app/build/outputs/apk/debug/app-debug.apk AutoVideo.apk
           gh release create "build-${{ github.run_number }}" AutoVideo.apk \
-            --title "AutoVideo (compilación ${{ github.run_number }})" \
+            --title "AutoYouTube (compilación ${{ github.run_number }})" \
             --notes "APK compilado automáticamente a partir de ${{ github.sha }}." \
             --latest
