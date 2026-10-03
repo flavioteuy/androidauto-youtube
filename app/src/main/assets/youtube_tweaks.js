@@ -639,6 +639,39 @@
   window.addEventListener('popstate', schedule);
   window.addEventListener('resize', function () { measureRight(); });
 
+  /* ---------- Barra de tiempo del reproductor ----------
+     YouTube guarda dónde está la barra de tiempo y solo lo recalcula con el evento "resize" de la
+     ventana. Al entrar o salir de pantalla completa la ventana no cambia de tamaño (en el auto ya
+     ocupa toda la pantalla), así que la barra seguía con la posición del reproductor chico y al
+     arrastrarla el video iba a otro punto (más a la izquierda). Se avisa "resize" cada vez que el
+     reproductor cambia de tamaño. */
+  function nudgeResize() {
+    [0, 150, 500, 1200].forEach(function (t) {
+      setTimeout(function () { window.dispatchEvent(new Event('resize')); }, t);
+    });
+  }
+  ['fullscreenchange', 'webkitfullscreenchange'].forEach(function (ev) {
+    document.addEventListener(ev, nudgeResize, true);
+  });
+  var playerSizeObserver = null, observedPlayer = null, lastPlayerSize = '', playerNudgeTimer = 0;
+  function watchPlayerSize() {
+    var pc = document.getElementById('player-container-id');
+    if (!pc || pc === observedPlayer || !window.ResizeObserver) return;
+    if (!playerSizeObserver) {
+      playerSizeObserver = new ResizeObserver(function (entries) {
+        var r = entries[entries.length - 1].contentRect;
+        var size = Math.round(r.width) + 'x' + Math.round(r.height);
+        if (size === lastPlayerSize) return;
+        lastPlayerSize = size;
+        clearTimeout(playerNudgeTimer);
+        playerNudgeTimer = setTimeout(nudgeResize, 100);
+      });
+    }
+    if (observedPlayer) playerSizeObserver.unobserve(observedPlayer);
+    playerSizeObserver.observe(pc);
+    observedPlayer = pc;
+  }
+
   /* ---------- Reproducción: datos para el tablero y acciones del volante ---------- */
   function mainVideo() {
     return document.querySelector('.html5-main-video') || document.querySelector('video');
@@ -773,7 +806,7 @@
   function start() {
     safely(updateMode, hideOpenApp, measureRight);
     new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
-    setInterval(function () { safely(updateMode, measureRight, updateUpcoming); }, 1000);
+    setInterval(function () { safely(updateMode, measureRight, updateUpcoming, watchPlayerSize); }, 1000);
     setInterval(function () { reportMedia(false); }, 2000);
   }
 
