@@ -11,8 +11,8 @@ android {
         applicationId = "uy.autovideo"
         minSdk = 26
         targetSdk = 35
-        versionCode = 13
-        versionName = "2.11"
+        versionCode = 14
+        versionName = "2.12"
     }
 
     signingConfigs {

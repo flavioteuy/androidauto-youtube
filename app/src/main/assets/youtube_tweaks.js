@@ -213,7 +213,18 @@
     'html[data-av-upcoming] #player-container-id .html5-video-container,',
     'html[data-av-upcoming] #player-container-id .ytp-offline-slate,',
     'html[data-av-upcoming] #player-container-id .ytp-offline-slate-background { background-color: transparent !important; }',
-    'html[data-av-upcoming] #player-container-id video { opacity: 0 !important; }'
+    'html[data-av-upcoming] #player-container-id video { opacity: 0 !important; }',
+    /* YouTube pone una imagen negra de relleno en el recuadro y oculta su propio aviso: se quita la
+       imagen y se muestra el aviso del estreno ("Se estrena en..." y la fecha) sobre la miniatura. */
+    'html[data-av-upcoming] #player-thumbnail-overlay { display: none !important; }',
+    '#av-upcoming-thumb .av-upcoming-label:empty { display: none; }',
+    '#av-upcoming-thumb .av-upcoming-label {',
+    '  position: absolute; left: 10px; bottom: 10px; max-width: calc(100% - 20px); box-sizing: border-box;',
+    '  padding: 6px 10px; border-radius: 8px; background: rgba(0, 0, 0, 0.72); color: #fff;',
+    '  font: 600 15px/1.25 Roboto, Arial, sans-serif;',
+    '}',
+    '#av-upcoming-thumb .av-upcoming-sub { display: block; font-weight: 400; font-size: 13px; opacity: 0.9; }',
+    '#av-upcoming-thumb .av-upcoming-sub:empty { display: none; }'
   ].join('\n');
 
   function addStyle() {
@@ -256,6 +267,33 @@
     return !!vd.isUpcoming || ps.status === 'LIVE_STREAM_OFFLINE';
   }
 
+  function textOf(x) {
+    if (!x) return '';
+    if (x.simpleText) return x.simpleText;
+    return (x.runs || []).map(function (r) { return r.text || ''; }).join('');
+  }
+
+  /* Aviso del estreno ("Se estrena en 70 minutos", "3 de octubre a las 20:30") y su miniatura. */
+  function upcomingSlate(id) {
+    var yt = ytPlayer(), prs = [];
+    try { if (yt && yt.getPlayerResponse) prs.push(yt.getPlayerResponse()); } catch (e) { /* sin reproductor */ }
+    prs.push(window.ytInitialPlayerResponse);
+    for (var i = 0; i < prs.length; i++) {
+      var pr = prs[i];
+      if (!pr || !pr.videoDetails || pr.videoDetails.videoId !== id) continue;
+      var ps = pr.playabilityStatus || {};
+      var ls = ps.liveStreamability && ps.liveStreamability.liveStreamabilityRenderer;
+      var slate = ls && ls.offlineSlate && ls.offlineSlate.liveStreamOfflineSlateRenderer;
+      var thumbs = slate && slate.thumbnail && slate.thumbnail.thumbnails;
+      return {
+        main: (slate && textOf(slate.mainText)) || ps.reason || '',
+        sub: (slate && textOf(slate.subtitleText)) || '',
+        thumb: thumbs && thumbs.length ? thumbs[thumbs.length - 1].url : ''
+      };
+    }
+    return null;
+  }
+
   function isUpcoming(id) {
     var yt = ytPlayer(), r = null;
     try { r = responseSaysUpcoming(yt && yt.getPlayerResponse ? yt.getPlayerResponse() : null, id); } catch (e) { r = null; }
@@ -277,12 +315,34 @@
     var upcoming = !!id && isUpcoming(id);
     if (upcoming) {
       var pc = document.getElementById('player-container-id');
-      if (pc && !document.getElementById('av-upcoming-thumb')) {
-        var thumb = document.createElement('div');
+      var thumb = document.getElementById('av-upcoming-thumb');
+      if (pc && !thumb) {
+        thumb = document.createElement('div');
         thumb.id = 'av-upcoming-thumb';
+        // YouTube exige Trusted Types: nada de innerHTML, se arma elemento por elemento.
+        var labelBox = document.createElement('div');
+        labelBox.className = 'av-upcoming-label';
+        thumb.appendChild(labelBox);
         pc.insertBefore(thumb, pc.firstChild);
       }
-      setVar(root, '--av-thumb', 'url("https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/hqdefault.jpg")');
+      var info = upcomingSlate(id) || {};
+      var img = /^https:\/\/i\d?\.ytimg\.com\//.test(info.thumb || '') ? info.thumb
+        : 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/hqdefault.jpg';
+      setVar(root, '--av-thumb', 'url("' + img.replace(/["\\]/g, '') + '")');
+      var label = thumb && thumb.querySelector('.av-upcoming-label');
+      if (label) {
+        var key = (info.main || '') + '|' + (info.sub || '');
+        if (label.getAttribute('data-key') !== key) {
+          label.setAttribute('data-key', key);
+          label.textContent = info.main || '';
+          if (info.sub) {
+            var sub = document.createElement('span');
+            sub.className = 'av-upcoming-sub';
+            sub.textContent = info.sub;
+            label.appendChild(sub);
+          }
+        }
+      }
       if (!root.hasAttribute('data-av-upcoming')) root.setAttribute('data-av-upcoming', '');
     } else if (root.hasAttribute('data-av-upcoming')) {
       root.removeAttribute('data-av-upcoming');
