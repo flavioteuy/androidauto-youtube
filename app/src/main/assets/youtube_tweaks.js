@@ -198,7 +198,22 @@
     '}',
     'html[data-autovideo="watch"] :is(ytm-playlist-panel-video-renderer, ytm-single-column-watch-next-results-renderer) .YtmCompactMediaItemByline {',
     '  font-size: 11px !important; line-height: 14px !important; padding: 0 !important;',
-    '}'
+    '}',
+
+    /* Videos "Próximamente" (estrenos y transmisiones programadas): no hay video que mostrar y el
+       recuadro quedaba negro. Se muestra la miniatura del video detrás del reproductor, y los fondos
+       negros del reproductor pasan a transparentes (los textos y botones de YouTube siguen encima). */
+    '#av-upcoming-thumb { display: none; }',
+    'html[data-av-upcoming] #av-upcoming-thumb {',
+    '  display: block !important; position: absolute !important; inset: 0 !important; z-index: 0 !important;',
+    '  background: #000 var(--av-thumb) center / cover no-repeat !important; pointer-events: none !important;',
+    '}',
+    'html[data-av-upcoming] #player-container-id #player,',
+    'html[data-av-upcoming] #player-container-id .html5-video-player,',
+    'html[data-av-upcoming] #player-container-id .html5-video-container,',
+    'html[data-av-upcoming] #player-container-id .ytp-offline-slate,',
+    'html[data-av-upcoming] #player-container-id .ytp-offline-slate-background { background-color: transparent !important; }',
+    'html[data-av-upcoming] #player-container-id video { opacity: 0 !important; }'
   ].join('\n');
 
   function addStyle() {
@@ -223,6 +238,54 @@
         var target = el.closest('ytm-button-renderer, button, a') || el;
         target.style.setProperty('display', 'none', 'important');
       }
+    }
+  }
+
+  /* ---------- Videos "Próximamente": miniatura en el recuadro del reproductor ---------- */
+  var UPCOMING_TEXT = /se estrena|pr[oó]ximamente|programad[oa]|en vivo en|premieres?|upcoming|scheduled|live in/i;
+
+  function currentVideoId() {
+    if (location.pathname.indexOf('/watch') !== 0) return null;
+    try { return new URLSearchParams(location.search).get('v'); } catch (e) { return null; }
+  }
+
+  function responseSaysUpcoming(pr, id) {
+    if (!pr) return null;
+    var vd = pr.videoDetails || {}, ps = pr.playabilityStatus || {};
+    if (vd.videoId && vd.videoId !== id) return null;            // respuesta de otro video
+    return !!vd.isUpcoming || ps.status === 'LIVE_STREAM_OFFLINE';
+  }
+
+  function isUpcoming(id) {
+    var yt = ytPlayer(), r = null;
+    try { r = responseSaysUpcoming(yt && yt.getPlayerResponse ? yt.getPlayerResponse() : null, id); } catch (e) { r = null; }
+    if (r === null) { try { r = responseSaysUpcoming(window.ytInitialPlayerResponse, id); } catch (e) { r = null; } }
+    if (r) return true;
+    var slate = document.querySelector('#player-container-id .ytp-offline-slate');
+    if (slate && slate.offsetWidth > 0 && getComputedStyle(slate).display !== 'none') return true;
+    if (r === false) return false;
+    // Último recurso: el aviso que YouTube pone en el reproductor ("Se estrena el...").
+    var pc = document.getElementById('player-container-id');
+    var v = mainVideo();
+    var noVideo = !v || !(v.currentSrc || v.src || v.srcObject);
+    return !!(pc && noVideo && UPCOMING_TEXT.test(pc.innerText || ''));
+  }
+
+  function updateUpcoming() {
+    var root = document.documentElement;
+    var id = currentVideoId();
+    var upcoming = !!id && isUpcoming(id);
+    if (upcoming) {
+      var pc = document.getElementById('player-container-id');
+      if (pc && !document.getElementById('av-upcoming-thumb')) {
+        var thumb = document.createElement('div');
+        thumb.id = 'av-upcoming-thumb';
+        pc.insertBefore(thumb, pc.firstChild);
+      }
+      setVar(root, '--av-thumb', 'url("https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/hqdefault.jpg")');
+      if (!root.hasAttribute('data-av-upcoming')) root.setAttribute('data-av-upcoming', '');
+    } else if (root.hasAttribute('data-av-upcoming')) {
+      root.removeAttribute('data-av-upcoming');
     }
   }
 
@@ -386,6 +449,14 @@
       }
     }
     L.push('');
+    L.push('proximamente: ' + (root.hasAttribute('data-av-upcoming') ? 'si' : 'no'));
+    var pcd = document.getElementById('player-container-id');
+    if (pcd) {
+      L.push('');
+      L.push('== reproductor ==');
+      tree(pcd, 0, 6, 6, L);
+    }
+    L.push('');
     L.push('== arbol ytm-app ==');
     tree(document.querySelector('ytm-app') || document.body, 0, 9, 8, L);
     var panel = document.querySelector('ytm-engagement-panel');
@@ -418,6 +489,7 @@
       updateMode();
       hideOpenApp();
       measureRight();
+      updateUpcoming();
     }, 150);
   }
 
@@ -556,7 +628,7 @@
     hideOpenApp();
     measureRight();
     new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
-    setInterval(function () { updateMode(); measureRight(); }, 1000);
+    setInterval(function () { updateMode(); measureRight(); updateUpcoming(); }, 1000);
     setInterval(function () { reportMedia(false); }, 2000);
   }
 
