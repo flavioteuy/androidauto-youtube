@@ -201,11 +201,12 @@
     '}',
 
     /* Videos "Próximamente" (estrenos y transmisiones programadas): no hay video que mostrar y el
-       recuadro quedaba negro. Se muestra la miniatura del video detrás del reproductor, y los fondos
-       negros del reproductor pasan a transparentes (los textos y botones de YouTube siguen encima). */
+       recuadro quedaba negro. Se muestra la miniatura del video ENCIMA de todas las capas del
+       reproductor (alguna de ellas es negra según la versión de YouTube), sin bloquear toques. */
     '#av-upcoming-thumb { display: none; }',
     'html[data-av-upcoming] #av-upcoming-thumb {',
-    '  display: block !important; position: absolute !important; inset: 0 !important; z-index: 0 !important;',
+    '  display: block !important; position: absolute !important; inset: 0 !important; z-index: 9999 !important;',
+    '  visibility: visible !important; opacity: 1 !important;',
     '  background: #000 var(--av-thumb) center / cover no-repeat !important; pointer-events: none !important;',
     '}',
     'html[data-av-upcoming] #player-container-id #player,',
@@ -254,6 +255,14 @@
 
   /* ---------- Videos "Próximamente": miniatura en el recuadro del reproductor ---------- */
   var UPCOMING_TEXT = /se estrena|pr[oó]ximamente|programad[oa]|en vivo en|premieres?|upcoming|scheduled|live in/i;
+  /* Debajo del título, los estrenos dicen "1 en espera" (personas esperando el estreno). */
+  var WAITING_TEXT = /\ben espera\b|\besperando\b|\bwaiting\b/i;
+  var META_INFO_SEL = 'ytm-slim-video-metadata-section-renderer, ytm-slim-video-information-renderer';
+
+  function metadataSaysWaiting() {
+    var meta = document.querySelector(META_INFO_SEL);
+    return !!(meta && WAITING_TEXT.test(meta.innerText || ''));
+  }
 
   function currentVideoId() {
     if (location.pathname.indexOf('/watch') !== 0) return null;
@@ -302,6 +311,8 @@
     var slate = document.querySelector('#player-container-id .ytp-offline-slate');
     if (slate && slate.offsetWidth > 0 && getComputedStyle(slate).display !== 'none') return true;
     if (r === false) return false;
+    // Sin datos del reproductor (por ejemplo, YouTube no lo arma para un estreno): "1 en espera".
+    if (metadataSaysWaiting()) return true;
     // Último recurso: el aviso que YouTube pone en el reproductor ("Se estrena el...").
     var pc = document.getElementById('player-container-id');
     var v = mainVideo();
@@ -323,8 +334,9 @@
         var labelBox = document.createElement('div');
         labelBox.className = 'av-upcoming-label';
         thumb.appendChild(labelBox);
-        pc.insertBefore(thumb, pc.firstChild);
       }
+      // Al final del reproductor (encima de sus capas); se vuelve a poner si YouTube lo rearma.
+      if (pc && thumb && (thumb.parentNode !== pc || pc.lastElementChild !== thumb)) pc.appendChild(thumb);
       var info = upcomingSlate(id) || {};
       var img = /^https:\/\/i\d?\.ytimg\.com\//.test(info.thumb || '') ? info.thumb
         : 'https://i.ytimg.com/vi/' + encodeURIComponent(id) + '/hqdefault.jpg';
@@ -463,6 +475,58 @@
     for (var j = 0; j < kids.length && j < maxKids; j++) tree(kids[j], depth + 1, maxDepth, maxKids, out);
   }
 
+  /* Capas del reproductor: orden, tamaño, z-index y fondos (para ver qué tapa la miniatura). */
+  function styleOf(el) {
+    var cs = getComputedStyle(el), s = ' z=' + cs.zIndex;
+    if (cs.opacity !== '1') s += ' op=' + cs.opacity;
+    if (cs.backgroundColor && cs.backgroundColor !== 'rgba(0, 0, 0, 0)') s += ' bg=' + cs.backgroundColor;
+    if (cs.backgroundImage && cs.backgroundImage !== 'none') s += ' bgimg';
+    if (cs.pointerEvents === 'none') s += ' sin-toques';
+    if (el.tagName === 'IMG') {
+      s += ' img ' + el.naturalWidth + 'x' + el.naturalHeight + (/^data:/.test(el.currentSrc || el.src || '') ? ' (relleno)' : '');
+    }
+    return s;
+  }
+
+  function playerTree(el, depth, out) {
+    if (!el || out.length > 700) return;
+    out.push(new Array(depth + 2).join('  ') + describe(el) + ' ' + boxOf(el) + styleOf(el));
+    if (depth >= 5) return;
+    for (var i = 0, n = 0; i < el.children.length && n < 12; i++) {
+      if (SKIP_TAGS.test(el.children[i].tagName.toLowerCase())) continue;
+      n++;
+      playerTree(el.children[i], depth + 1, out);
+    }
+  }
+
+  /* Por qué se detecta (o no) un estreno, sin datos del video ni de la cuenta. */
+  function upcomingDebug() {
+    var id = currentVideoId(), yt = ytPlayer(), parts = [];
+    parts.push('reproductor ' + (yt ? 'si' : (document.getElementById('movie_player') ? 'sin funciones' : 'no')));
+    function whose(vid) { return vid === id ? 'de este video' : (vid ? 'de otro video' : 'sin id'); }
+    try {
+      var pr = yt && yt.getPlayerResponse ? yt.getPlayerResponse() : null;
+      parts.push('respuesta ' + (pr ? whose((pr.videoDetails || {}).videoId) + ' ' + ((pr.playabilityStatus || {}).status || '?') +
+        ((pr.videoDetails || {}).isUpcoming ? ' isUpcoming' : '') : 'ninguna'));
+    } catch (e) { parts.push('respuesta error'); }
+    var ip = window.ytInitialPlayerResponse;
+    parts.push('inicial ' + (ip && ip.videoDetails ? whose(ip.videoDetails.videoId) : 'ninguna'));
+    try {
+      var vd = yt && yt.getVideoData ? yt.getVideoData() : null;
+      if (vd) parts.push('datos ' + whose(vd.video_id) + (vd.isPremiere ? ' estreno' : '') + (vd.isLive ? ' vivo' : ''));
+      if (yt) parts.push('estado ' + yt.getPlayerState());
+    } catch (e) { parts.push('datos error'); }
+    var v = mainVideo();
+    parts.push('video ' + (v ? ((v.currentSrc || v.src || v.srcObject) ? 'con fuente' : 'sin fuente') : 'no'));
+    var slate = document.querySelector('#player-container-id .ytp-offline-slate');
+    parts.push('aviso ' + (slate ? (slate.offsetWidth > 0 ? 'visible' : 'oculto') : 'no'));
+    parts.push('en espera ' + (metadataSaysWaiting() ? 'si' : 'no'));
+    parts.push('texto ' + (UPCOMING_TEXT.test((document.getElementById('player-container-id') || {}).innerText || '') ? 'si' : 'no'));
+    var th = document.getElementById('av-upcoming-thumb');
+    parts.push('miniatura ' + (th ? boxOf(th) + styleOf(th) : 'no'));
+    return parts.join(' | ');
+  }
+
   function chain(el, n) {
     var out = [];
     for (var a = el; a && n-- > 0; a = a.parentElement) out.push('  ' + describe(a) + ' ' + boxOf(a) + containment(a));
@@ -510,11 +574,18 @@
     }
     L.push('');
     L.push('proximamente: ' + (root.hasAttribute('data-av-upcoming') ? 'si' : 'no'));
+    try { L.push('deteccion: ' + upcomingDebug()); } catch (e) { L.push('deteccion: error ' + e); }
     var pcd = document.getElementById('player-container-id');
     if (pcd) {
       L.push('');
       L.push('== reproductor ==');
-      tree(pcd, 0, 6, 6, L);
+      playerTree(pcd, 0, L);
+      try {
+        var pr = pcd.getBoundingClientRect();
+        var hits = document.elementsFromPoint(pr.left + pr.width / 2, pr.top + pr.height / 2) || [];
+        L.push('encima, en el centro del reproductor:');
+        for (var h = 0; h < hits.length && h < 6; h++) L.push('  ' + describe(hits[h]) + ' ' + boxOf(hits[h]) + styleOf(hits[h]));
+      } catch (e) { /* sin elementsFromPoint */ }
     }
     L.push('');
     L.push('== arbol ytm-app ==');
@@ -546,11 +617,15 @@
     pending = true;
     setTimeout(function () {
       pending = false;
-      updateMode();
-      hideOpenApp();
-      measureRight();
-      updateUpcoming();
+      safely(updateMode, hideOpenApp, measureRight, updateUpcoming);
     }, 150);
+  }
+
+  /* Cada ajuste por separado: si uno falla en alguna versión de YouTube, los demás igual corren. */
+  function safely() {
+    for (var i = 0; i < arguments.length; i++) {
+      try { arguments[i](); } catch (e) { /* se reintenta en la próxima vuelta */ }
+    }
   }
 
   ['pushState', 'replaceState'].forEach(function (name) {
@@ -684,11 +759,9 @@
   });
 
   function start() {
-    updateMode();
-    hideOpenApp();
-    measureRight();
+    safely(updateMode, hideOpenApp, measureRight);
     new MutationObserver(schedule).observe(document.documentElement, { childList: true, subtree: true });
-    setInterval(function () { updateMode(); measureRight(); updateUpcoming(); }, 1000);
+    setInterval(function () { safely(updateMode, measureRight, updateUpcoming); }, 1000);
     setInterval(function () { reportMedia(false); }, 2000);
   }
 
