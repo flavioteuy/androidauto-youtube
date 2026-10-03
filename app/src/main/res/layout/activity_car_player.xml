@@ -7,7 +7,7 @@
     android:fitsSystemWindows="true">
 
     <!-- YouTube ocupa toda la pantalla -->
-    <WebView
+    <uy.autovideo.car.BackgroundWebView
         android:id="@+id/car_web"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />

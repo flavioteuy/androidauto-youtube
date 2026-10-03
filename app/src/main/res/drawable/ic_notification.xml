@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Ícono de la notificación de reproducción: el volante con el play (solo silueta). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="60"
+    android:viewportHeight="60">
+    <group
+        android:translateX="-24"
+        android:translateY="-24">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M27,54 A27,27 0 1,0 81,54 A27,27 0 1,0 27,54 Z M33,54 A21,21 0 1,0 75,54 A21,21 0 1,0 33,54 Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:pathData="M32,50.5 L43,52 L43,56 L32,57.5 Z M76,50.5 L65,52 L65,56 L76,57.5 Z M52,65 L56,65 L57.5,76 L50.5,76 Z" />
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M42,54 A12,12 0 1,0 66,54 A12,12 0 1,0 42,54 Z M50.5,49.3 Q50.5,47.5 52.03,48.45 L59.47,53.05 Q61,54 59.47,54.95 L52.03,59.55 Q50.5,60.5 50.5,58.7 Z" />
+    </group>
+</vector>

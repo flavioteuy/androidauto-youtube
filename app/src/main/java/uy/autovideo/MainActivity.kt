@@ -140,13 +140,13 @@ class MainActivity : Activity() {
         checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED
 
     private fun requestPermissionsNow() {
-        requestPermissions(
-            arrayOf(
-                Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.ACCESS_COARSE_LOCATION,
-            ),
-            REQUEST_PERMISSIONS
+        val perms = mutableListOf(
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.ACCESS_COARSE_LOCATION,
         )
+        // Notificación de "Sonando en el auto" (controles de reproducción).
+        if (Build.VERSION.SDK_INT >= 33) perms.add("android.permission.POST_NOTIFICATIONS")
+        requestPermissions(perms.toTypedArray(), REQUEST_PERMISSIONS)
     }
 
     override fun onRequestPermissionsResult(

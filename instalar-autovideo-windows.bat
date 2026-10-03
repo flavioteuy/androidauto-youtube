@@ -86,6 +86,7 @@ echo        Instalado.
 echo        Dando permiso de ubicacion (para tapar la imagen si el auto se mueve)...
 "%ADB%" shell pm grant uy.autovideo android.permission.ACCESS_FINE_LOCATION >nul 2>&1
 "%ADB%" shell pm grant uy.autovideo android.permission.ACCESS_COARSE_LOCATION >nul 2>&1
+"%ADB%" shell pm grant uy.autovideo android.permission.POST_NOTIFICATIONS >nul 2>&1
 
 rem ---- 5. Reiniciar Android Auto para que vea la app ----
 echo  [5/5] Reiniciando Android Auto...

@@ -69,6 +69,10 @@ class CarPlayerActivity : Activity() {
     private val bridgeListener: (String) -> Unit = { url -> load(url) }
 
     private var destroyed = false
+    private var visibleNow = false
+
+    /** Si queda en pausa sin mostrarse mucho tiempo, se apaga el servicio de reproducción. */
+    private val idleStop = Runnable { PlaybackService.stop(this) }
 
     /** Botones del volante y del tablero → reproductor de YouTube. */
     private val mediaController = object : NowPlaying.Controller {
@@ -135,12 +139,17 @@ class CarPlayerActivity : Activity() {
 
     override fun onStart() {
         super.onStart()
+        visibleNow = true
+        // Con la pantalla visible Android deja iniciar el servicio; después sigue aunque se oculte.
+        PlaybackService.start(this)
+        main.removeCallbacks(idleStop)
         motionGuard.start()
         main.removeCallbacks(diagTick)
         main.postDelayed(diagTick, DIAG_TICK_MS)
     }
 
     override fun onStop() {
+        visibleNow = false
         main.removeCallbacks(diagTick)
         motionGuard.stop()
         showLock(false)
@@ -163,13 +172,21 @@ class CarPlayerActivity : Activity() {
                 NowPlaying.stop()
                 return
             }
+            val playing = o.optBoolean("playing")
+            if (playing) {
+                main.removeCallbacks(idleStop)
+                if (!PlaybackService.running) PlaybackService.start(this)
+            } else if (!visibleNow) {
+                main.removeCallbacks(idleStop)
+                main.postDelayed(idleStop, IDLE_STOP_MS)
+            }
             NowPlaying.update(
                 context = this,
                 newTitle = o.optString("t"),
                 newArtist = o.optString("a"),
                 newDurationMs = o.optLong("d"),
                 positionMs = o.optLong("p"),
-                playing = o.optBoolean("playing"),
+                playing = playing,
                 buffering = o.optBoolean("buf"),
                 rate = o.optDouble("r", 1.0).toFloat(),
                 artworkUrl = o.optString("art"),
@@ -217,6 +234,8 @@ class CarPlayerActivity : Activity() {
 
     override fun onDestroy() {
         destroyed = true
+        main.removeCallbacks(idleStop)
+        PlaybackService.stop(this)
         CarBridge.removeListener(bridgeListener)
         if (NowPlaying.controller === mediaController) {
             NowPlaying.controller = null
@@ -340,6 +359,8 @@ class CarPlayerActivity : Activity() {
         webView.isVerticalScrollBarEnabled = false
         webView.isHorizontalScrollBarEnabled = false
         webView.overScrollMode = View.OVER_SCROLL_NEVER
+        // El motor de la página mantiene prioridad alta aunque Android Auto tape la pantalla.
+        webView.setRendererPriorityPolicy(WebView.RENDERER_PRIORITY_IMPORTANT, false)
 
         webView.settings.apply {
             javaScriptEnabled = true
@@ -469,6 +490,7 @@ class CarPlayerActivity : Activity() {
         private const val DIAG_TICK_MS = 3_000L
         private const val DIAG_FIRST_MS = 6_000L
         private const val DIAG_SECOND_MS = 20_000L
+        private const val IDLE_STOP_MS = 30 * 60_000L
         private val YOUTUBE_ORIGINS = setOf("https://m.youtube.com", "https://www.youtube.com", "https://youtube.com")
     }
 }

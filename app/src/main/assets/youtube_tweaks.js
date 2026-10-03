@@ -10,6 +10,20 @@
   if (window.__autoVideoTweaks) return;
   window.__autoVideoTweaks = true;
 
+  /* ---------- La página cree que siempre está visible ----------
+     Cuando Android Auto tapa la pantalla al manejar, YouTube pausaría el video; así el audio sigue
+     (la imagen igual queda oculta por Android Auto). */
+  try {
+    var always = function (value) { return { configurable: true, get: function () { return value; } }; };
+    Object.defineProperty(Document.prototype, 'hidden', always(false));
+    Object.defineProperty(Document.prototype, 'visibilityState', always('visible'));
+    Object.defineProperty(Document.prototype, 'webkitHidden', always(false));
+    Object.defineProperty(Document.prototype, 'webkitVisibilityState', always('visible'));
+    ['visibilitychange', 'webkitvisibilitychange'].forEach(function (ev) {
+      window.addEventListener(ev, function (e) { e.stopImmediatePropagation(); }, true);
+    });
+  } catch (e) { /* sin Page Visibility API */ }
+
   /* ---------- Lo que suena, para el tablero del auto y los botones del volante ----------
      Se guardan las acciones que YouTube registra (siguiente, anterior...) para poder llamarlas. */
   var mediaHandlers = {};

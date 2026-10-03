@@ -60,6 +60,8 @@ Requiere Android 15 o superior en el teléfono.
 - **Tablero del auto:** el tablero muestra el título, el canal y el tiempo del video (probado en un
   Ford Fusion con SYNC 3). La app no se registra como app de música: con eso Android Auto abría una
   pantalla de música vacía en vez del video, y no hace falta para el tablero.
+- **Al manejar:** Android Auto oculta el video ("No disponible mientras conduces"), pero el audio
+  sigue, y se controla desde la tarjeta de Android Auto, el volante o la notificación del teléfono.
 - **Probar sin ir al auto:** en la app del teléfono, "Probar en el teléfono" abre la pantalla del
   auto en horizontal. "Copiar diagnóstico" copia cómo está armada la página para ajustar el diseño.
 

@@ -23,6 +23,10 @@
     <string name="motion_speed_label">Velocidad: más de %1$d km/h</string>
     <string name="motion_seconds_label">Durante: %1$d segundos seguidos (máx. 7200)</string>
 
+    <!-- Reproducción en segundo plano -->
+    <string name="playback_channel">Reproducción</string>
+    <string name="playback_notification">Sonando en el auto</string>
+
     <!-- Probar en el teléfono y diagnóstico -->
     <string name="diag_title">Pantalla del auto</string>
     <string name="diag_desc">Puedes probar la pantalla del auto aquí mismo, en horizontal. Si algo se ve mal: abre un video común y uno de un Mix, espera unos 20 segundos en cada uno, vuelve aquí y toca Copiar diagnóstico para pegarlo en el chat. Solo copia cómo está armada la página, no tus datos.</string>

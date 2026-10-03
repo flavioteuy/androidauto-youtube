@@ -4,6 +4,11 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
 
+    <!-- Audio al manejar: servicio de reproducción en primer plano con su notificación. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <!-- Opcional: el GPS permite tapar la imagen si el vehículo se mueve
          (protección extra; Android Auto ya bloquea las apps "para estacionado" al manejar). -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
@@ -59,6 +64,13 @@
                 <category android:name="android.intent.category.CAR_LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <!-- Mantiene viva la app mientras suena, para que el audio siga cuando Android Auto oculta el
+             video al manejar. No es un servicio de música para Android Auto (no lo registra como tal). -->
+        <service
+            android:name=".car.PlaybackService"
+            android:exported="false"
+            android:foregroundServiceType="mediaPlayback" />
 
         <!-- Sin servicio de música ni declaración "media": con eso Android Auto abría una pantalla
              de música vacía en vez del video. La sesión de reproducción queda dentro de la app. -->
