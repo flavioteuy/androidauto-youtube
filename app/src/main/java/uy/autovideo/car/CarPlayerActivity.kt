@@ -54,6 +54,7 @@ class CarPlayerActivity : Activity() {
     private lateinit var motionGuard: MotionGuard
 
     private var fullscreenView: View? = null
+    private var fullscreenFrame: AlwaysVisibleFrame? = null
     private var fullscreenCallback: WebChromeClient.CustomViewCallback? = null
     private var usingDocumentStartScript = false
 
@@ -73,6 +74,20 @@ class CarPlayerActivity : Activity() {
 
     /** Si queda en pausa sin mostrarse mucho tiempo, se apaga el servicio de reproducción. */
     private val idleStop = Runnable { PlaybackService.stop(this) }
+
+    /*
+     * Respaldo para la pantalla completa: si al taparse la pantalla (pasar a "drive") el video se
+     * pausa solo, sin que nadie lo pause desde el volante, el tablero o la pantalla, se reanuda.
+     */
+    private var playingNow = false
+    private var pausedAt = 0L
+    private var stoppedAt = 0L
+    private var userMediaActionAt = 0L
+    private val resumeAfterHide = Runnable {
+        if (!destroyed && !visibleNow && userMediaActionAt < stoppedAt - USER_ACTION_GRACE_MS) {
+            webView.evaluateJavascript("window.__avResumeIfPaused && window.__avResumeIfPaused()", null)
+        }
+    }
 
     /** Botones del volante y del tablero → reproductor de YouTube. */
     private val mediaController = object : NowPlaying.Controller {
@@ -143,6 +158,7 @@ class CarPlayerActivity : Activity() {
         // Con la pantalla visible Android deja iniciar el servicio; después sigue aunque se oculte.
         PlaybackService.start(this)
         main.removeCallbacks(idleStop)
+        main.removeCallbacks(resumeAfterHide)
         motionGuard.start()
         main.removeCallbacks(diagTick)
         main.postDelayed(diagTick, DIAG_TICK_MS)
@@ -150,6 +166,11 @@ class CarPlayerActivity : Activity() {
 
     override fun onStop() {
         visibleNow = false
+        stoppedAt = SystemClock.elapsedRealtime()
+        if (fullscreenView != null && (playingNow || stoppedAt - pausedAt < RECENT_PAUSE_MS)) {
+            main.removeCallbacks(resumeAfterHide)
+            RESUME_CHECKS_MS.forEach { main.postDelayed(resumeAfterHide, it) }
+        }
         main.removeCallbacks(diagTick)
         motionGuard.stop()
         showLock(false)
@@ -157,6 +178,7 @@ class CarPlayerActivity : Activity() {
     }
 
     private fun mediaAction(action: String, arg: Double? = null) {
+        userMediaActionAt = SystemClock.elapsedRealtime()
         main.post {
             if (destroyed) return@post
             val argJs = if (arg != null) ", $arg" else ""
@@ -173,6 +195,8 @@ class CarPlayerActivity : Activity() {
                 return
             }
             val playing = o.optBoolean("playing")
+            if (playingNow && !playing) pausedAt = SystemClock.elapsedRealtime()
+            playingNow = playing
             if (playing) {
                 main.removeCallbacks(idleStop)
                 if (!PlaybackService.running) PlaybackService.start(this)
@@ -235,6 +259,7 @@ class CarPlayerActivity : Activity() {
     override fun onDestroy() {
         destroyed = true
         main.removeCallbacks(idleStop)
+        main.removeCallbacks(resumeAfterHide)
         PlaybackService.stop(this)
         CarBridge.removeListener(bridgeListener)
         if (NowPlaying.controller === mediaController) {
@@ -438,22 +463,24 @@ class CarPlayerActivity : Activity() {
         fullscreenView = view
         fullscreenCallback = callback
         view.setBackgroundColor(Color.BLACK)
+        // Dentro de un marco que siempre se declara visible: si Android Auto tapa la pantalla al
+        // manejar, el video no se pausa (ver AlwaysVisibleFrame).
+        val frame = AlwaysVisibleFrame(this)
+        frame.setBackgroundColor(Color.BLACK)
+        frame.addView(view, FrameLayout.LayoutParams(MATCH, MATCH))
+        fullscreenFrame = frame
         // Encima de todo, pero debajo del aviso de movimiento.
-        root.addView(
-            view,
-            root.indexOfChild(lockView),
-            FrameLayout.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-        )
+        root.addView(frame, root.indexOfChild(lockView), FrameLayout.LayoutParams(MATCH, MATCH))
         pill.visibility = View.GONE
         setSystemBarsHidden(true)
     }
 
     private fun exitFullscreen(notifyPage: Boolean) {
         val view = fullscreenView ?: return
-        root.removeView(view)
+        val frame = fullscreenFrame
+        frame?.removeView(view)
+        root.removeView(frame ?: view)
+        fullscreenFrame = null
         fullscreenView = null
         val callback = fullscreenCallback
         fullscreenCallback = null
@@ -491,6 +518,10 @@ class CarPlayerActivity : Activity() {
         private const val DIAG_FIRST_MS = 6_000L
         private const val DIAG_SECOND_MS = 20_000L
         private const val IDLE_STOP_MS = 30 * 60_000L
+        private const val RECENT_PAUSE_MS = 3_000L
+        private const val USER_ACTION_GRACE_MS = 5_000L
+        private val RESUME_CHECKS_MS = longArrayOf(1_500L, 4_000L)
+        private const val MATCH = ViewGroup.LayoutParams.MATCH_PARENT
         private val YOUTUBE_ORIGINS = setOf("https://m.youtube.com", "https://www.youtube.com", "https://youtube.com")
     }
 }

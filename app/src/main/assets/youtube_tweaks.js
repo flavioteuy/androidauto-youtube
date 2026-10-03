@@ -686,6 +686,18 @@
     }
   };
 
+  /* Respaldo de la pantalla completa (lo llama la app justo después de que Android Auto tapa la
+     pantalla): si el video quedó en pausa sin que nadie tocara la pantalla, se reanuda. */
+  var lastTouchAt = 0;
+  ['touchstart', 'pointerdown', 'mousedown', 'keydown'].forEach(function (ev) {
+    window.addEventListener(ev, function () { lastTouchAt = Date.now(); }, true);
+  });
+  window.__avResumeIfPaused = function () {
+    if (Date.now() - lastTouchAt < 6000) return;      // lo pausó alguien desde la pantalla
+    var v = mainVideo();
+    if (v && v.paused && !v.ended && (v.currentSrc || v.src || v.srcObject)) window.__avMediaAction('play');
+  };
+
   var lastMediaKey = '';
   var lastMediaForced = 0;
   function reportMedia(force) {
